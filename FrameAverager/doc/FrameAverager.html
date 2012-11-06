@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta content="text/html; charset=ISO-8859-1"
+      http-equiv="Content-Type">
+    <title>FrameAverager</title>
+  </head>
+  <body>
+    <meta http-equiv="Content-Type" content="text/html;
+      charset=ISO-8859-1">
+    <basefont face="Verdana" size="2">
+    <h1><img alt="Icon"
+        src="file:///C:/cdp_/gbh/FrameAveragerDoc/frameIcon.png"
+        height="32" width="32"> FrameAverager Plugin for MicroManager</h1>
+    by Amitabh Verma &amp; Grant Harris<br>
+    Marine Biological Laboratory, 2012<br>
+    <br>
+    FrameAverager is a MicroManager plugin that provides multiple
+    exposure/frame averaging during acquisition.&nbsp; We offer this
+    both as a plugin that is useful in its own right, and as an
+    example/demonstration of using attachedRunnables and DataProcessors
+    as part of the acquisition process.<br>
+    <h2>Using the Plugin</h2>
+    Start it from the plugins menu.<br>
+    <br>
+    <img alt="ScreenShot" src="FrameAvgScrn.png" height="183"
+      width="337"><br>
+    <br>
+    <br>
+    Set the number of frames to average (N) and click the enabled
+    checkbox. <br>
+    <br>
+    Channels to avoid can be specified so that they are not multi-frame
+    averaged.<br>
+    <br>
+    <h2>How it works</h2>
+    <br>
+    For each hardware setting (channel), multiple exposures/frames are
+    acquired and an image containing the averaged image is &#8216;produced&#8217;
+    into the DataProcessor chain.&nbsp; This is achieved this by
+    utilizing 2 extension points in the AcquisitionEngine which allow
+    you to add functionality to the image processing chain: Attached
+    Runnables and DataProcessors.<br>
+    <br>
+    The <span style="font-weight: bold;">FrameAverager </span>class
+    instantiates the runnable and the DataProcessor, manages enabling
+    and disabling, and maintains a shared array of TaggedImages.<br>
+    <br>
+    <h3>Attached Runnable</h3>
+    An instance of a Runnable class can be attached to the AcqEngine by
+    calling attachRunnable(t, p, s, c, runnable), where t, p, s, c
+    specify the timepoints, positions, slices and channels for which it
+    will be invoked.&nbsp; (Passing a value of -1 results in the
+    runnable being attached at all values of that index.)&nbsp; It is
+    invoked <span style="font-style: italic;">after </span>the
+    hardware/devices have been set to the states required for the
+    current setting and <span style="font-style: italic;">before </span>an
+
+
+
+
+    image is acquired/snapped by the AcqEngine.&nbsp; <br>
+    <br>
+    <span style="font-weight: bold;">FrameAverageRunnable </span>extends
+
+
+    java.lang.Runnable and is attached to the AcquisitionEngine.&nbsp;
+    When FrameAveragerRunnable is invoked, it pauses the AcqEngine,
+    acquires (N-1) exposures/frames (N is the number of frames to
+    average) and puts them in the shared array of TaggedImages.&nbsp; It
+    then releases/un-pauses the AcqEngine.<br>
+    <br>
+    At this point, the AcqEngine acquires the image (as usual) and
+    pushes it into the image queue/pipeline
+    (DefaultTaggedImagePipeline)&nbsp; The DataProcessor
+    (FrameAverageProcessor) then receives this image and continues the
+    process.<br>
+    <br>
+    <h3>DataProcessor</h3>
+    <p>A DataProcessor&lt;TaggedImage&gt; can be added to the image
+      processing chain using
+      AcquisitionEngine.addImageProcessor().&nbsp; The inputs and
+      outputs of the DataProcessors are connected together in the
+      ProcessorStack.&nbsp; The output of the ProcessorStack is input to
+      the LiveAcq which put the image into the ImageCache where its is
+      saved.&nbsp; The display is notified and updated to show the last
+      image.&nbsp; <br>
+    </p>
+    <p> The <span style="font-weight: bold;">FrameAverageProcessor </span>extends
+
+
+
+      DataProcessor&lt;TaggedImage&gt;.&nbsp; An instance is added to
+      the processing pipeline with a call to addImageProcessor().&nbsp;
+      FrameAverageProcessor receives the image from the image pipeline
+      which it uses as the the Nth frame.&nbsp; This image is added to
+      the shared TaggedImages array and the average for each pixel
+      is&nbsp; computed.&nbsp; The resulting image is then produced
+      (i.e. passed to the next DataProcessor in the ProcessorStack).<br>
+    </p>
+    <br>
+    <br>
+    <img alt="Classes" style=" width: 632px; height: 447px; border: 0px
+      solid;" src="FrmAvgClasses.png"><br>
+    <br>
+    [ TODO Add section on using as an API...<br>
+    The LC-PolScope Pol-Acquisition plugin uses FrameAverager directly.
+    ]<br>
+    <br>
+    <br>
+    <b>The MicroManager Image Acquisition, Processing and Display
+      Pipeline</b><br>
+    <br>
+    <meta http-equiv="Content-Type" content="text/html;
+      charset=ISO-8859-1">
+    <!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:View>Normal</w:View>
+  <w:Zoom>0</w:Zoom>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";}
+</style>
+<![endif]--><span style="font-size:10.0pt;font-family:Verdana;
+      mso-fareast-font-family:&quot;Times New
+      Roman&quot;;mso-bidi-font-family:&quot;Times New Roman&quot;;
+mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA"><!--[if gte vml 1]><v:shapetype
+ id="_x0000_t75" coordsize="21600,21600" o:spt="75" o:preferrelative="t"
+ path="m@4@5l@4@11@9@11@9@5xe" filled="f" stroked="f">
+ <v:stroke joinstyle="miter"/>
+ <v:formulas>
+  <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+  <v:f eqn="sum @0 1 0"/>
+  <v:f eqn="sum 0 0 @1"/>
+  <v:f eqn="prod @2 1 2"/>
+  <v:f eqn="prod @3 21600 pixelWidth"/>
+  <v:f eqn="prod @3 21600 pixelHeight"/>
+  <v:f eqn="sum @0 0 1"/>
+  <v:f eqn="prod @6 1 2"/>
+  <v:f eqn="prod @7 21600 pixelWidth"/>
+  <v:f eqn="sum @8 21600 0"/>
+  <v:f eqn="prod @7 21600 pixelHeight"/>
+  <v:f eqn="sum @10 21600 0"/>
+ </v:formulas>
+ <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+ <o:lock v:ext="edit" aspectratio="t"/>
+</v:shapetype><v:shape id="_x0000_i1025" type="#_x0000_t75" alt="" style='width:459pt;
+ height:356.25pt'>
+ <v:imagedata src="file:///C:\Users\GBH\AppData\Local\Temp\msohtml1\01\clip_image001.png"
+  o:href="../../../../Users/GBH/AppData/Local/Temp/EverNoteTempDir/0000@32640_41266c13da480f2c-c93c.png"/>
+</v:shape><![endif]--><!--[if !vml]--><img style=" width: 612px; height:
+        475px; border: 0px solid;" alt="MMImagePipeline"
+        src="MMImgPipeline.png" v:shapes="_x0000_i1025"><!--[endif]--></span>
+    <meta name="ProgId" content="Word.Document">
+    <meta name="Generator" content="Microsoft Word 10">
+    <meta name="Originator" content="Microsoft Word 10">
+    <link rel="File-List"
+href="file:///C:%5CUsers%5CGBH%5CAppData%5CLocal%5CTemp%5Cmsohtml1%5C01%5Cclip_filelist.xml">
+    <link rel="Edit-Time-Data"
+href="file:///C:%5CUsers%5CGBH%5CAppData%5CLocal%5CTemp%5Cmsohtml1%5C01%5Cclip_editdata.mso">
+    <style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-1593833729 1073750107 16 0 415 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style><br>
+    <meta http-equiv="Content-Type" content="text/html;
+      charset=ISO-8859-1">
+    <!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:View>Normal</w:View>
+  <w:Zoom>0</w:Zoom>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";}
+</style>
+<![endif]-->
+    <p class="MsoNormal">See also, Multi-Dimensional Acquisition
+      Programming,<o:p></o:p></p>
+    <p class="MsoNormal">(<a
+href="http://valelab.ucsf.edu/%7EMM/MMwiki/index.php/Multi-Dimensional_Acquisition_Programming">http://valelab.ucsf.edu/~MM/MMwiki/index.php/Multi-Dimensional_Acquisition_Programming</a>)<br>
+    </p>
+    <br>
+    <meta name="GENERATOR" content="BLOCKNOTE.NET">
+    <meta name="source">
+    <title></title>
+    <style>BODY { FONT-FAMILY:Verdana; FONT-SIZE:10pt }
+P { FONT-FAMILY:Verdana; FONT-SIZE:10pt }
+DIV { FONT-FAMILY:Verdana; FONT-SIZE:10pt }
+TD { FONT-FAMILY:Verdana; FONT-SIZE:10pt }
+</style>
+  </body>
+</html>

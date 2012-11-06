@@ -1,0 +1,38 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+		<div>TODO write content</div>
+		/**
+ * A frame which is AlwaysOnTopFrame and contains often used settings and actions. Features: - 'Show' makes the
+ * MMStudioMainFrame visible, as well as any other registered JFrames. - Remembers its position and size on the desktop.
+ * - Camera panel allows toggling Live mode and changing exposure - Hotkeys for increasing (F12) and decreasing (F11)
+ * exposure - Closing the TopFrame closes MMgr and ImageJ.
+ *
+ * - SomeAction is included as a template for creating an action
+ *
+ * To enable another plugin to register with TopFrame without having a dependency, i.e. only if TopFrame.jar is
+ * available:
+ *
+ * private void registerFrameWithToolFrame(JFrame controlFrame_) { // call static TopFrame.addFrameToShow(JFrame frame)
+ * try { ClassLoader l = Thread.currentThread().getContextClassLoader(); Class cls = l.loadClass("TopFrame"); Method
+ * mainMethod = cls.getDeclaredMethod("addFrameToShow", new Class[]{JFrame.class}); mainMethod.invoke(null, new
+ * Object[]{controlFrame_}); } catch (Exception ex) { ex.printStackTrace(); } }
+ *
+ * private void registerActionWithToolFrame(Action action) { // call static TopFrame.addActionButton(Action action) try
+ * { ClassLoader l = Thread.currentThread().getContextClassLoader(); Class cls = l.loadClass("TopFrame"); Method
+ * mainMethod = cls.getDeclaredMethod("addActionButton", new Class[]{Action.class}); mainMethod.invoke(null, new
+ * Object[]{action}); } catch (Exception ex) { ex.printStackTrace(); } }
+ * 
+ * TODO:
+ * - Prevent multiple copies of a button/action to be added to TopFrame
+ * - Allow removal of a button
+  </body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta content="text/html; charset=ISO-8859-1"
+      http-equiv="Content-Type">
+    <title>TopFrame</title>
+  </head>
+  <body>
+    <meta http-equiv="Content-Type" content="text/html;
+      charset=ISO-8859-1">
+    <basefont face="Verdana" size="2">
+    <h1><img alt="Icon"
+        src="file:///C:/cdp_/gbh/FrameAveragerDoc/frameIcon.png"
+        height="32" width="32"> TopFrame Plugin for MicroManager</h1>
+    by Grant B. Harris<br>
+    Marine Biological Laboratory, 2012<br>
+    <br>
+    TopFrame is a MicroManager plugin that provides an always-visible
+    'top frame' containing often-used controls and actions.&nbsp;
+    TopFrame is extensible - TopFrame-aware plugins can add action
+    buttons to the toolbar, making them easily available. <br>
+    <br>
+    Start TopFrame from the Micro-Manager Plugins menu.<br>
+    <h2><img alt="TopFrame"
+        src="file:///C:/cdp_/gbh/TopFrameDoc/TopFrame.png" height="96"
+        width="421"></h2>
+    <br>
+    <h2>TopFrame Features</h2>
+    <b><br>
+      Window Management</b><br>
+    <br>
+    While performing acquisitions and image processing, it is no
+    uncommon to accumulate numerous display windows on the
+    desktop.&nbsp; To make it easy to access commonly used <br>
+    <ul>
+      <li><b>Show Button</b></li>
+    </ul>
+    <blockquote>Pressing the 'Show' button makes MMStudioMainFrame as
+      well as any other registered JFrames visible by bringing to
+      'to-the-top' in relation to other windows/frame open on the
+      desktop.&nbsp; (See 'Adding a Frame to Show' below.)<br>
+    </blockquote>
+    <br>
+    <b>Camera Control</b><br>
+    <br>
+    When TopFrame is started, it makes available several camera-related
+    controls: <b><br>
+    </b>
+    <ul>
+      <li><b>Live Toggle Button</b></li>
+    </ul>
+    <blockquote>This toggles (alternately turns on/off) the Live Mode
+      for the camera.<br>
+    </blockquote>
+    <ul>
+      <li><b>Exposure Spinner</b></li>
+    </ul>
+    <blockquote>This is a spinner control for changing the exposure
+      setting.&nbsp; The increment of increase/decrease for the spinner
+      changes based on the current value.&nbsp; Hotkeys are also defined
+      for increasing (F12) and decreasing (F11) the exposure.<br>
+    </blockquote>
+    <b>Other Features</b><br>
+    <br>
+    - Saves and restores its position and size on the desktop.<br>
+    <br>
+    <br>
+    SomeAction button is an example of a TopFrame-aware plugin adding an
+    action button.<br>
+    <br>
+    <h3>Automatically Starting TopFrame</h3>
+    For convenience, TopFrame can be automatically started when
+    Micro-Manager is started by adding this code to the BeanShell script
+    that is automatically run (by default, MMStartup.bsh):<br>
+    <pre>setAccessibility(true);<br>import org.micromanager.MMStudioMainFrame.PluginItem;<br>for (PluginItem plugin : gui.plugins_)<br>&nbsp;&nbsp;&nbsp; if (plugin.className.equals("TopFramePlugin")) {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plugin.instantiate();<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plugin.plugin.show();<br>&nbsp;&nbsp;&nbsp; } <br><br></pre>
+    <h2>Making a Plugin TopFrame-Aware</h2>
+    <br>
+    A Micro-Manager plugin can be made TopFrame-Aware without having a
+    direct dependency on TopFrame; this way, a plugin can be distributed
+    and installed to Micro-Manager installation that may or may not have
+    TopFrame installed.<br>
+    <br>
+    The trick is to use reflection to dynamically load a class and
+    invoke a method.&nbsp; Using this approach, the plugin can attempt
+    to add its components to TopFrame and will not case an error if the
+    TopFrame.jar is not available.&nbsp; (It fails when it invokes
+    loadClass("TopFrame"), and the exception can simply be ignored; the
+    printStackTrace can be removed after debugging.)&nbsp; This approach
+    is used in the following sections to enable another plugin to
+    register an action or a frame to show with TopFrame.<br>
+    <h3>Adding an Action Button</h3>
+    First, create an Action that invokes the functionality that you want
+    the button to have.<br>
+    <br>
+    Here is an example of how to create an Action:<br>
+    <blockquote>
+      <pre>public class SomeAction extends AbstractAction {&nbsp;&nbsp;&nbsp; <br>    public SomeAction() {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; putValue(NAME, "SomeAction");<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; putValue(ACTION_COMMAND_KEY, "someaction");<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; try {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; putValue(SMALL_ICON, new javax.swing.ImageIcon(getClass().getResource("frameIcon.png")));</pre>
+      <pre>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; } catch (Exception ex) {}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; putValue(SHORT_DESCRIPTION, "Perform some action");<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_I));<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK, false));<br>&nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp;&nbsp; public void actionPerformed(ActionEvent ae) {<br>	// for example<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; SwingUtilities.invokeLater(new Runnable() {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; public void run() { <br>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; System.out.println("I have been invoked.");<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; });<br>&nbsp;&nbsp;&nbsp; }<br>}</pre>
+    </blockquote>
+    The properties of the button are taken from the property values in
+    the Action that is passed and are handled as follows:<br>
+    <ul>
+      <li>ACTION_COMMAND_KEY is a unique string used as a hash key.</li>
+      <li>NAME becomes the label on the button.</li>
+      <li>SMALL_ICON is added to the button.</li>
+      <li>SHORT_DESCRIPTION becomes the tooltip for the button.</li>
+      <li>MNEMONIC_KEY (?)</li>
+      <li>ACCELERATOR_KEY is added as a GlobalHotKey (see below)<br>
+        Pass a KeyStroke, for example:<br>
+        KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK,
+        false));<br>
+        (See docs for <a
+href="http://docs.oracle.com/javase/6/docs/api/javax/swing/KeyStroke.html">KeyStroke</a>)<br>
+      </li>
+    </ul>
+    <br>
+    Now, add this method to your plugin and call it passing the Action:<br>
+    <h3>
+    </h3>
+    <blockquote>
+      <pre>private void registerActionWithTopFrame(Action action) {<br>  // call static TopFrame.addActionButton(Action action)<br>  try {<br>    ClassLoader l = Thread.currentThread().getContextClassLoader();<br>    Class cls = l.loadClass("TopFrame");<br>    Method mainMethod = cls.getDeclaredMethod("addActionButton", new Class[]{Action.class});<br>    mainMethod.invoke(null, new Object[]{action});<br>  } catch (Exception ex) {<br>    ex.printStackTrace();&nbsp; // remove after debugging<br>  }<br>}</pre>
+    </blockquote>
+    <br>
+    TopFrame does not allow multiple copies of a button/action to be
+    added.
+    <h3>Adding a Frame to 'Show'</h3>
+    A plugin can add its window/frame to the set of frames that are
+    brought to the top on the desktop when the 'Show' button is
+    pressed.&nbsp; To do this, do the following:<br>
+    <br>
+    1. Add this method to the plugin:<br>
+    <blockquote>
+      <pre>private void registerFrameWithTopFrame(JFrame controlFrame_) {<br>  // call static TopFrame.addFrameToShow(JFrame frame)<br>  try {<br>    ClassLoader l = Thread.currentThread().getContextClassLoader();<br>    Class cls = l.loadClass("TopFrame");<br>    Method mainMethod = cls.getDeclaredMethod("addFrameToShow", new Class[]{JFrame.class});<br>    mainMethod.invoke(null, new Object[]{controlFrame_});<br>  } catch (Exception ex) {<br>    ex.printStackTrace();&nbsp; // remove after debugging<br>  }<br>}</pre>
+    </blockquote>
+    <br>
+    2. Add a call to this method that passes the plugin's frame as the
+    parameter.<br>
+    <br>
+    <br>
+    <meta name="GENERATOR" content="BLOCKNOTE.NET">
+    <meta name="source">
+    <title></title>
+    <style>BODY { FONT-FAMILY:Verdana; FONT-SIZE:10pt }
+P { FONT-FAMILY:Verdana; FONT-SIZE:10pt }
+DIV { FONT-FAMILY:Verdana; FONT-SIZE:10pt }
+TD { FONT-FAMILY:Verdana; FONT-SIZE:10pt }
+</style>
+  </body>
+</html>
