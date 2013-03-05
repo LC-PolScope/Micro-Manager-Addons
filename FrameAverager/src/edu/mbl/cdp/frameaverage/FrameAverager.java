@@ -1,7 +1,7 @@
 package edu.mbl.cdp.frameaverage;
 
 /*
- * Copyright © 2009 – 2012, Marine Biological Laboratory
+ * Copyright © 2009 – 2013, Marine Biological Laboratory
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
 
@@ -26,11 +26,14 @@ package edu.mbl.cdp.frameaverage;
  * the authors and should not be interpreted as representing official policies, 
  * either expressed or implied, of any organization.
  */
+import java.util.prefs.Preferences;
 import javax.swing.JFrame;
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
+import org.micromanager.MMOptions;
 import org.micromanager.acquisition.AcquisitionWrapperEngine;
 import org.micromanager.api.DataProcessor;
+import org.micromanager.utils.ReportingUtils;
 
 /**
  * FrameAverager
@@ -47,6 +50,8 @@ public class FrameAverager {
     FrameAveragerRunnable runnable;
     FrameAveragerProcessor processor;
     private FrameAveragerControls controlFrame_;
+    
+    public boolean debugLogEnabled_ = false;
     private boolean enabled_;
     int numberFrames;
     int[] avoidDisplayChs_ = null;
@@ -61,6 +66,13 @@ public class FrameAverager {
         // 4 frames by default
         numberFrames = 4;
         setNumberFrames(numberFrames);
+        getDebugOptions();
+    }
+    
+    public void getDebugOptions() {
+        Preferences root = Preferences.userNodeForPackage(MMOptions.class);
+        Preferences prefs = root.node(root.absolutePath() + "/" + "MMOptions");      
+        debugLogEnabled_ = prefs.getBoolean("DebugLog", debugLogEnabled_);
     }
 
     public void attachRunnable() {
@@ -78,7 +90,9 @@ public class FrameAverager {
                 }
             }
         }
-        core_.logMessage("FrameAvg: runnable attached");
+        if (debugLogEnabled_) {
+            ReportingUtils.logMessage("FrameAvg: runnable attached");
+        }
     }
 
     public int getNumberFrames() {
@@ -108,7 +122,6 @@ public class FrameAverager {
         if (enableAveraging) {
             startProcessor();
             attachRunnable();
-            //mmImageProcessor_.setName("Image Averaging");
             enabled_ = true;
         } else {
             // Disable
@@ -120,12 +133,9 @@ public class FrameAverager {
 
     public void startProcessor() {
         try {
-//			if (numberFrames > 1) {
             attachDataProcessor();
-//			}
         } catch (Exception ex) {
         }
-
     }
 
     public void attachDataProcessor() {
@@ -139,20 +149,23 @@ public class FrameAverager {
         }
         try {
             engineWrapper_.removeImageProcessor(processor.getDataProcessor());
-            core_.logMessage("FrameAvg: processor removed");
-//			processor = null;
+            
+            if (debugLogEnabled_) {
+                ReportingUtils.logMessage("FrameAvg: processor removed");
+            }
         } catch (Exception ex) {
         }
-        //updateLabel("Averaging is Disabled.");
     }
 
     public void stopAndClearRunnable() {
         try {
             engineWrapper_.clearRunnables();  // Potentially dangerous - needs specific clearRunnable(X)
-            core_.logMessage("FrameAvg: runnable removed");
+            
+            if (debugLogEnabled_) {
+                ReportingUtils.logMessage("FrameAvg: runnable removed");
+            }
         } catch (Exception ex) {
         }
-        //updateLabel("Averaging is Disabled.");
     }
 
     public DataProcessor<TaggedImage> getDataProcessor() {

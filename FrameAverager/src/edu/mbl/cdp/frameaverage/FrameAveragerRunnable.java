@@ -1,7 +1,7 @@
 package edu.mbl.cdp.frameaverage;
 
 /*
- * Copyright © 2009 – 2012, Marine Biological Laboratory
+ * Copyright © 2009 – 2013, Marine Biological Laboratory
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
 
@@ -28,12 +28,18 @@ package edu.mbl.cdp.frameaverage;
  */
 import ij.ImageStack;
 import ij.gui.ImageWindow;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import mmcorej.CMMCore;
+import org.micromanager.MMOptions;
 import org.micromanager.acquisition.AcquisitionVirtualStack;
 import org.micromanager.acquisition.AcquisitionWrapperEngine;
 import org.micromanager.acquisition.VirtualAcquisitionDisplay;
 import org.micromanager.api.ScriptInterface;
+import org.micromanager.utils.GUIUtils;
 import org.micromanager.utils.ImageFocusListener;
+import org.micromanager.utils.ReportingUtils;
 
 /**
  *
@@ -49,55 +55,92 @@ public class FrameAveragerRunnable implements Runnable, ImageFocusListener {
     VirtualAcquisitionDisplay display_;
     boolean isDisplayControlsEnabled = false;
     FrameAverager fa;
-
+        
+    boolean isAdditionalDelayReg = false;
+    static String CameraNameProperty = "CameraName";
+    static String[] AdditionalDelayCams = {"Retiga 4000R"};
+    
     FrameAveragerRunnable(FrameAverager fa) {
         this.fa = fa;
         this.core_ = fa.core_;
         this.engineWrapper_ = fa.engineWrapper_;
+        additionalDelayCheck();
+        fa.getDebugOptions();
+        GUIUtils.registerImageFocusListener(this); // Image Window listener
+    }
+    
+    
+    final void additionalDelayCheck() {
+        try {
+            String cam = core_.getCameraDevice();
+            String camName = core_.getProperty(cam, CameraNameProperty);
+            for (int i=0; i < AdditionalDelayCams.length; i++) {
+                if (camName.equals(AdditionalDelayCams[i])) {
+                    isAdditionalDelayReg = true;
+                } else {
+                    isAdditionalDelayReg = false;
+                }
+            }
+        } catch (Exception ex) {
+            isAdditionalDelayReg = false;
+            ReportingUtils.logError(ex);
+        }        
     }
 
     @Override
     public void run() {
         if (fa.numberFrames > 1) {
             try {
-                core_.logMessage("FrameAvg: entering runnable");
+                if (fa.debugLogEnabled_) {
+                    ReportingUtils.logMessage("FrameAvg: entering runnable");
+                }
                 engineWrapper_.setPause(true);
                 acquireImages();
                 engineWrapper_.setPause(false);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                core_.logMessage("ERROR: FrameAvg: while entering runnable");
+                ReportingUtils.logMessage("ERROR: FrameAvg: while entering runnable");
             }
         }
     }
 
     public void acquireImages() {
         try {
-//            manageShutter(true);
             core_.waitForDevice(core_.getCameraDevice());
             core_.clearCircularBuffer();
-
-            core_.startSequenceAcquisition(fa.numberFrames-1, 0, true);
+            String cam = core_.getCameraDevice();
+            
+//          CMMCore::startSequenceAcquisition(long numImages, double intervalMs, bool stopOnOverflow)
+//          @param numImages Number of images requested from the camera
+//          @param intervalMs interval between images, currently only supported by Andor cameras
+//          @param stopOnOverflow whether or not the camera stops acquiring when the circular buffer is full
+            core_.startSequenceAcquisition(fa.numberFrames-1, 0, false);
+            
             long now = System.currentTimeMillis();
             int frame = 1;// keep 0 free for the image from engine
             // reference BurstExample.bsh
-            while (core_.getRemainingImageCount() > 0 || core_.isSequenceRunning(core_.getCameraDevice())) {
+            
+            while (core_.getRemainingImageCount() > 0 || core_.isSequenceRunning(cam)) {
                 if (core_.getRemainingImageCount() > 0) {
-                   fa.taggedImageArray[frame] = core_.popNextTaggedImage();                   
+                    if (isAdditionalDelayReg) {
+                        Thread.sleep(250);
+                    }
+                   fa.taggedImageArray[frame] = core_.popNextTaggedImage();
                    frame++;
-                    if (fa.processor.isDisplayAvailable) {
+                    //if (fa.processor.isDisplayAvailable) {
                         if (display_ != null) {
                             if (display_.isActiveDisplay()) {
                                 display_.displayStatusLine("Image Avg. Acquiring No. " + frame);
                             }
                         }
-                    }
-                } 
+                    //}
+                }
              }
             long itTook = System.currentTimeMillis() - now;
-            core_.stopSequenceAcquisition(core_.getCameraDevice());  
-            core_.logMessage("Averaging Acquisition took: " + itTook + " milliseconds for "+fa.numberFrames + " frames");
-            
+            core_.stopSequenceAcquisition(cam);  
+            if (fa.debugLogEnabled_) {
+                ReportingUtils.logMessage("Averaging Acquisition took: " + itTook + " milliseconds for "+fa.numberFrames + " frames");
+            }
             // keep 0 free for the image from engine
 //            for (int i = 1; i < fa.numberFrames; i++) {
 //                core_.waitForDevice(core_.getCameraDevice());                
@@ -121,40 +164,28 @@ public class FrameAveragerRunnable implements Runnable, ImageFocusListener {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            core_.logMessage("FrameAvg Error");
+            ReportingUtils.logMessage("FrameAvg Error");
             engineWrapper_.setPause(false);
         }
     }
-    private boolean shutterOriginalState_;
-    private boolean autoShutterOriginalState_;
-
-    private void manageShutter(boolean enable) throws Exception {
-        String shutterLabel = core_.getShutterDevice();
-        if (shutterLabel.length() > 0) {
-            if (enable) {
-                shutterOriginalState_ = core_.getShutterOpen();
-                autoShutterOriginalState_ = core_.getAutoShutter();
-                core_.setAutoShutter(false);
-                core_.setShutterOpen(shutterOriginalState_ || autoShutterOriginalState_);
-            } else {
-                core_.setShutterOpen(shutterOriginalState_);
-                core_.setAutoShutter(autoShutterOriginalState_);
-            }
-        }
-    }
+    
 
     @Override
     public void focusReceived(ImageWindow focusedWindow) {
-        // discard simple imageJ windows
+        // discard if closed
+        if (focusedWindow == null) {
+            return;
+        }
+        // discard Snap/Live Window
         if (focusedWindow != null) {
             if (focusedWindow.getTitle().startsWith("Snap/Live Window")) {
                 return;
-            }
-            if (!focusedWindow.getImagePlus().isHyperStack()) {
-                return;
-            }
+            }     
         }
-        ImageStack ImpStack = focusedWindow.getImagePlus().getImageStack();
-        display_ = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
+        
+        if (!focusedWindow.isClosed()) {
+            ImageStack ImpStack = focusedWindow.getImagePlus().getImageStack();
+            display_ = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
+        }
     }
 }

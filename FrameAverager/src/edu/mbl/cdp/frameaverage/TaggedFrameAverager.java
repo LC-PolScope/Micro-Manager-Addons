@@ -1,7 +1,7 @@
 package edu.mbl.cdp.frameaverage;
 
 /*
- * Copyright © 2009 – 2012, Marine Biological Laboratory
+ * Copyright © 2009 – 2013, Marine Biological Laboratory
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
 

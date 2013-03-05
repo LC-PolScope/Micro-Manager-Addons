@@ -1,7 +1,7 @@
 package edu.mbl.cdp.frameaverage;
 
 /*
- * Copyright © 2009 – 2012, Marine Biological Laboratory
+ * Copyright © 2009 – 2013, Marine Biological Laboratory
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
 
@@ -31,6 +31,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.net.URL;
 import java.util.Arrays;
+import javax.swing.JFrame;
 import mmcorej.CMMCore;
 import org.micromanager.acquisition.AcquisitionWrapperEngine;
 
@@ -58,7 +59,7 @@ public class FrameAveragerControls extends javax.swing.JFrame {
 	private FrameAverager fa;
 	private AcquisitionWrapperEngine engine_ = null;
 	private boolean enabled_ = false;
-
+        private static JFrame About;
 	/**
 	 * Creates new form FrameAveragerControls
 	 */
@@ -90,6 +91,9 @@ public class FrameAveragerControls extends javax.swing.JFrame {
         labelStatus = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Frame Averager");
@@ -143,6 +147,20 @@ public class FrameAveragerControls extends javax.swing.JFrame {
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel3.setText("Multi-Frame Averaging");
+
+        jMenu1.setText("Help");
+
+        jMenuItem1.setText("About");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
+        jMenuBar1.add(jMenu1);
+
+        setJMenuBar(jMenuBar1);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -222,6 +240,13 @@ public class FrameAveragerControls extends javax.swing.JFrame {
     updateNumFramesField();
   }//GEN-LAST:event_numFramesFieldFocusLost
 
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        if (About==null) {
+            About = new About(this);
+        }        
+        About.setVisible(true);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
 	  private void updateNumFramesField() {                                               
 		int num;
 		String str = numFramesField.getText().trim().toString();
@@ -243,6 +268,9 @@ public class FrameAveragerControls extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JLabel labelStatus;
     private javax.swing.JTextField numFramesField;
     // End of variables declaration//GEN-END:variables

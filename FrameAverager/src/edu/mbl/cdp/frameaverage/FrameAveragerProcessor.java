@@ -1,7 +1,7 @@
 package edu.mbl.cdp.frameaverage;
 
 /*
- * Copyright © 2009 – 2012, Marine Biological Laboratory
+ * Copyright © 2009 – 2013, Marine Biological Laboratory
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
 
@@ -51,7 +51,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 	public static TaggedImage POISON = new TaggedImage(null, null);
 	double exposure;
 	
-        boolean isDisplayAvailable = false;
+        //boolean isDisplayAvailable = false;
 	//int numberFrames_ = 1;
 	int imgDepth;
 	int iNO = 0;
@@ -60,7 +60,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 	public FrameAveragerProcessor(FrameAverager fa, CMMCore core) {
 		this.fa = fa;
 		core_ = core;
-                isDisplayAvailable = false;
+                //isDisplayAvailable = false;
 		//engine_ = gui_.getAcquisitionEngine();
 	}
 
@@ -79,7 +79,9 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 
 			if (fa.numberFrames < 2) { // if MFA is disabled
 				produce(taggedImage);
-				core_.logMessage("FrameAvg: averaging disabled");
+                                if (fa.debugLogEnabled_) {
+                                    ReportingUtils.logMessage("FrameAvg: averaging disabled");
+                                }
 				return;
 			}
 			json = taggedImage.tags;
@@ -89,7 +91,9 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 			if (fa.avoidDisplayChs_ != null) {// channel avoidance
 				for (int c = 0; c < fa.avoidDisplayChs_.length; c++) {
 					if (channel == fa.avoidDisplayChs_[c]) {
-						core_.logMessage("FrameAvg: avoided channel: " + channel + " " + channelName);
+                                                if (fa.debugLogEnabled_) {
+                                                    ReportingUtils.logMessage("FrameAvg: avoided channel: " + channel + " " + channelName);
+                                                }
 						produce(taggedImage);
 						return;
 					}
@@ -102,21 +106,20 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 				produce(taggedImage);
 				return;
 			}
-
-			core_.logMessage("FrameAvg: entering processor");
-
+                        if (fa.debugLogEnabled_) {
+                            core_.logMessage("FrameAvg: entering processor");
+                        }
 			// taggedImageArray has the rest of the array filled before in Runnable
-			fa.taggedImageArray[0] = taggedImage;
-			//fa.setAveragingRunning(true); // ?????
-
                         
-			compute(fa.taggedImageArray); // on to computing avg. frame
-                        isDisplayAvailable = true;
-
-			core_.logMessage("FrameAvg: exiting processor");
+                    fa.taggedImageArray[0] = taggedImage;
+                    compute(fa.taggedImageArray); // on to computing avg. frame
+                    //isDisplayAvailable = true;
+                    if (fa.debugLogEnabled_) {
+                        core_.logMessage("FrameAvg: exiting processor");
+                    }
 
 		} catch (Exception ex) {
-			core_.logMessage("ERROR: FrameAvg, in Process: ");
+			ReportingUtils.logError("ERROR: FrameAvg, in Process: ");
 			ex.printStackTrace();
 			produce(POISON);
 		}
@@ -125,7 +128,9 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 	private void compute(TaggedImage[] taggedImageArrayTemp) {   
             
 		try {
-			core_.logMessage("FrameAvg: computing...");
+                        if (fa.debugLogEnabled_) {
+                            ReportingUtils.logMessage("FrameAvg: computing...");
+                        }
 			TaggedImage taggedImage = taggedImageArrayTemp[0];
 
 			int width = MDUtils.getWidth(taggedImage.tags);
@@ -145,23 +150,23 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 				if (imgDepth == 1) {
 					pixB = (byte[]) taggedImageArrayTemp[i].pix;
 					for (int j = 0; j < dimension; j++) {
-						retF[j] = (float) (retF[j] + (pixB[j] & 0xff));
+						retF[j] = (float) (retF[j] + (int) (pixB[j] & 0xff));
 					}
 				} else if (imgDepth == 2) {
 					pixS = (short[]) taggedImageArrayTemp[i].pix;
 					for (int j = 0; j < dimension; j++) {
-						retF[j] = (float) (retF[j] + (pixS[j] & 0xff));
+						retF[j] = (float) (retF[j] + (int)(pixS[j] & 0xffff));
 					}
 				}
 			}
 			if (imgDepth == 1) {
 				for (int j = 0; j < dimension; j++) {
-					retB[j] = (byte) (retF[j] / fa.numberFrames);
+					retB[j] = (byte) (int)(retF[j] / fa.numberFrames);
 				}
 				result = retB;
 			} else if (imgDepth == 2) {
 				for (int j = 0; j < dimension; j++) {
-					retS[j] = (short) (retF[j] / fa.numberFrames);
+					retS[j] = (short) (int)(retF[j] / fa.numberFrames);
 				}
 				result = retS;
 			}
@@ -171,10 +176,12 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 			tags.put(FrameAverager.METADATAKEY, fa.numberFrames);
 			TaggedImage averagedImage = new TaggedImage(result, tags);
 			produce(averagedImage);
-			core_.logMessage("FrameAvg: produced averaged image");
+                        if (fa.debugLogEnabled_) {
+                            ReportingUtils.logMessage("FrameAvg: produced averaged image");
+                        }
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			core_.logMessage("Error: FrameAvg, while producing averaged img.");
+			ReportingUtils.logError("Error: FrameAvg, while producing averaged img.");
 			produce(taggedImageArrayTemp[0]);
 		}                
 	}
