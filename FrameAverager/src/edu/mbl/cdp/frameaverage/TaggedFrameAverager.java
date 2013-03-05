@@ -27,6 +27,7 @@ package edu.mbl.cdp.frameaverage;
  * either expressed or implied, of any organization.
  */
 import javax.swing.JFrame;
+import mmcorej.CMMCore;
 import org.micromanager.acquisition.AcquisitionWrapperEngine;
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
@@ -45,14 +46,22 @@ public class TaggedFrameAverager implements MMPlugin {
     public static final String tooltipDescription = "Multiple-Frame Averaging";
     //
     FrameAverager fa;
-    ScriptInterface gui;
-
+    static ScriptInterface gui;    
+    
     @Override
     public void setApp(ScriptInterface si) {
-        gui = si;
         
+        gui = si;                
+        fa = new FrameAverager(getAcquisitionWrapperEngine(), gui.getMMCore());
+    }    
+    
+    public static AcquisitionWrapperEngine getAcquisitionWrapperEngine() {
         AcquisitionWrapperEngine engineWrapper = (AcquisitionWrapperEngine) gui.getAcquisitionEngine();
-        fa = new FrameAverager(engineWrapper, gui.getMMCore());
+        return engineWrapper;
+    }
+    
+    public static CMMCore getCMMCore() {       
+        return gui.getMMCore();
     }
 
     @Override

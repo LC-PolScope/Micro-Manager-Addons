@@ -33,6 +33,7 @@ import mmcorej.TaggedImage;
 import org.micromanager.MMOptions;
 import org.micromanager.acquisition.AcquisitionWrapperEngine;
 import org.micromanager.api.DataProcessor;
+import org.micromanager.internalinterfaces.AcqSettingsListener;
 import org.micromanager.utils.ReportingUtils;
 
 /**
@@ -47,7 +48,7 @@ public class FrameAverager {
     static final String METADATAKEY = "FramesAveraged";
     CMMCore core_;
     AcquisitionWrapperEngine engineWrapper_;
-    FrameAveragerRunnable runnable;
+//    FrameAveragerRunnable runnable;
     FrameAveragerProcessor processor;
     private FrameAveragerControls controlFrame_;
     
@@ -67,6 +68,11 @@ public class FrameAverager {
         numberFrames = 4;
         setNumberFrames(numberFrames);
         getDebugOptions();
+    }
+    
+    public void UpdateEngineAndCore() {
+        engineWrapper_ = TaggedFrameAverager.getAcquisitionWrapperEngine();
+        core_ = TaggedFrameAverager.getCMMCore();
     }
     
     public void getDebugOptions() {
@@ -178,4 +184,5 @@ public class FrameAverager {
         }
         return controlFrame_;
     }
+
 }
