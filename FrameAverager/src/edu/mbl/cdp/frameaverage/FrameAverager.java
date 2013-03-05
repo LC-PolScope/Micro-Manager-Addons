@@ -87,12 +87,16 @@ public class FrameAverager {
         // 'Engine channels' to avoid are not included.
         if (avoidEngineChs_ == null) {
             engineWrapper_.attachRunnable(-1, -1, -1, -1, setPauseAndAcquire); // t, p, s, c
-        } else {
+        } else {            
             for (int i = 0; i < engineWrapper_.getChannels().size(); i++) {
+                boolean bool = true;                
                 for (int j = 0; j < avoidEngineChs_.length; j++) {
-                    if (i != avoidEngineChs_[j]) {
-                        engineWrapper_.attachRunnable(-1, -1, -1, i, setPauseAndAcquire);
+                    if (i == avoidEngineChs_[j]) {
+                        bool = false;
                     }
+                }
+                if (bool) {
+                    engineWrapper_.attachRunnable(-1, -1, -1, i, setPauseAndAcquire);
                 }
             }
         }
