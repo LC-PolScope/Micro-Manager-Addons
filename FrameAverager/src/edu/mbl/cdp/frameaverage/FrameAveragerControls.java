@@ -126,6 +126,14 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
                 formWindowClosed(evt);
             }
         });
+        addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                formFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                formFocusLost(evt);
+            }
+        });
 
         numFramesField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         numFramesField.setText("4");
@@ -264,6 +272,14 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         }
         About.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void formFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_formFocusGained
+        fa.getDebugOptions();
+    }//GEN-LAST:event_formFocusGained
+
+    private void formFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_formFocusLost
+        fa.getDebugOptions();
+    }//GEN-LAST:event_formFocusLost
 
     private void updateNumFramesField() {
         int num;
