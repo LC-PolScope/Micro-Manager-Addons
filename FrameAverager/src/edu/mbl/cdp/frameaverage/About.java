@@ -1,8 +1,36 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.mbl.cdp.frameaverage;
+
+/*
+ * Copyright © 2009 – 2013, Marine Biological Laboratory
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, 
+ * this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, 
+ * this list of conditions and the following disclaimer in the documentation 
+ * and/or other materials provided with the distribution.
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND 
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * The views and conclusions contained in the software and documentation are those of 
+ * the authors and should not be interpreted as representing official policies, 
+ * either expressed or implied, of any organization.
+ * 
+ * Multiple-Frame Averaging plug-in for Micro-Manager
+ * @author Amitabh Verma (averma@mbl.edu), Grant Harris (gharris@mbl.edu)
+ * Marine Biological Laboratory, Woods Hole, Mass.
+ * 
+ */
 
 import java.awt.Cursor;
 import java.awt.Image;
@@ -18,22 +46,12 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import org.micromanager.utils.ReportingUtils;
 
-/**
- *
- * @author Amitabh
- * 
- */
-
 public class About extends javax.swing.JFrame {
 
-  /**
-   * Creates new form About
-   */
-     
-  public static final String BugPageLink_ = "https://github.com/LC-PolScope/Micro-Manager-Addons/issues/";
+  public static final String BugPageLink_ = "https://www.openpolscope.org/mantis/";
   public static final String BugPageLinkLABEL_ = "<html><a href=" + BugPageLink_ + ">Web Page</a>";
   
-  public static final String WebPageLink_ = "http://www.mbl.edu/cdp/oldenbourg-lab/micromanager-plugins/frame-averager/";
+  public static final String WebPageLink_ = "http://www.openpolscope.org/pages/MMPlugin_Frame_Averager.htm";
   public static final String WebPageLinkLABEL_ = "<html><a href=" + WebPageLink_ + ">Web Page</a>";
     
   public About(JFrame frame) {
@@ -88,27 +106,6 @@ public class About extends javax.swing.JFrame {
         }
     }
   
-  public static String readTextFile(String filepath) {
-        
-        String strFinal = "";
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(filepath));
-
-            String str;
-            while ((str = in.readLine()) != null) {
-                if (strFinal.isEmpty()) {
-                    strFinal = str;
-                } else {
-                    strFinal = strFinal + "\n" + str;
-                }
-            }
-            in.close();
-        } catch (IOException e) {
-        }
-        
-        return strFinal;
-    }
-  
   /**
    * This method is called from within the constructor to initialize the form.
    * WARNING: Do NOT modify this code. The content of this method is always
@@ -138,7 +135,7 @@ public class About extends javax.swing.JFrame {
         jScrollPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         textPaneLicense.setEditable(false);
-        textPaneLicense.setText("﻿Copyright © 2009 - 2013, Marine Biological Laboratory\n\nLICENSE (Berkeley Software Distribution License): Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n3. Neither the name of the Marine Biological Laboratory nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nThe views and conclusions contained in the software and documentation are those of the authors and should not be interpreted as representing official policies, either expressed or implied, of any organization.\n\nDeveloped at the Laboratory of Rudolf Oldenbourg at the Marine Biological Laboratory in Woods Hole, MA.");
+        textPaneLicense.setText("﻿Copyright © 2009 - 2013, Marine Biological Laboratory\n\nLICENSE (Berkeley Software Distribution License): Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n3. Neither the name of the Marine Biological Laboratory nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nThe views and conclusions contained in the software and documentation are those of the authors and should not be interpreted as representing official policies, either expressed or implied, of any organization.\n\nDeveloped at the Laboratory of Rudolf Oldenbourg at the Marine Biological Laboratory in Woods Hole, MA.\n\nSoftware Developers: Amitabh Verma & Grant Harris");
         textPaneLicense.setAutoscrolls(false);
         jScrollPane1.setViewportView(textPaneLicense);
 

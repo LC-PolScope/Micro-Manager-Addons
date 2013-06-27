@@ -71,15 +71,33 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <tstamp>
+    <format property="TODAY" pattern="MM-dd-yyyy" />
+    </tstamp>
+    
+    <loadfile property="Version_Major" srcfile="..\..\PolScopeAPI\PsPluginsAppApi\src\edu\mbl\cdp\ps\Version_Major.txt"/>
+    <loadfile property="Version_Minor" srcfile="..\..\PolScopeAPI\PsPluginsAppApi\src\edu\mbl\cdp\ps\Version_Minor.txt"/>
+    <loadfile property="Version_Type" srcfile="..\..\PolScopeAPI\PsPluginsAppApi\src\edu\mbl\cdp\ps\Version_Type.txt"/>
+
+
+    <manifest file="MANIFEST.MF">
+    <attribute name="Signature-Title" value="FrameAverager"/>
+    <attribute name="Signature-Vendor" value="Marine Biological Laboratory (Rudolf Oldenbourg)"/>
+    <attribute name="Application-Plugin" value="Micro-Manager"/>
+    <attribute name="Built-By" value="${user.name}"/>
+    <attribute name="Built-Version" value="${Version_Major}.${Version_Minor}${Version_Type}"/>
+    <attribute name="Built-Date" value="${TODAY}"/>
+    </manifest>
+    
 <target name="-post-jar">  
-  <property name="MMPlugin_dist1" value="dist\FrameAverager.jar"/>
-  <property name="MMPlugin_dir1" value="C:\Micro-Manager-1.4\mmplugins\FrameAverager.jar"/>
+  <property name="MMPlugin_dist1" value="dist/FrameAverager.jar"/>
+  <property name="MMPlugin_dir1" value="${work.dir}/mmplugins/FrameAverager.jar"/>
   <copy tofile="${MMPlugin_dir1}">
   <fileset file="${MMPlugin_dist1}"/>
   </copy>
   
-  <property name="MMPlugin_dist2" value="dist\FrameAverager.jar"/>
-  <property name="MMPlugin_dir2" value="C:\cdp\distribution\mmplugins\FrameAverager.jar"/>
+  <property name="MMPlugin_dist2" value="dist/FrameAverager.jar"/>
+  <property name="MMPlugin_dir2" value="../../../trunk/OpenPolScope_dist/mmplugins/FrameAverager.jar"/>
   <copy tofile="${MMPlugin_dir2}">
   <fileset file="${MMPlugin_dist2}"/>
   </copy>

@@ -1,3 +1,10 @@
 Manifest-Version: 1.0
-X-COMMENT: Main-Class will be added automatically by build
+Ant-Version: Apache Ant 1.8.4
+Created-By: 1.6.0_31-b05 (Sun Microsystems Inc.)
+Signature-Title: FrameAverager
+Signature-Vendor: Marine Biological Laboratory (Rudolf Oldenbourg)
+Application-Plugin: Micro-Manager
+Built-By: Amitabh
+Built-Version: 2.14b
+Built-Date: 06-26-2013
 

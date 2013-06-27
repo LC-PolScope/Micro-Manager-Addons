@@ -25,7 +25,13 @@ package edu.mbl.cdp.frameaverage;
  * The views and conclusions contained in the software and documentation are those of 
  * the authors and should not be interpreted as representing official policies, 
  * either expressed or implied, of any organization.
+ * 
+ * Multiple-Frame Averaging plug-in for Micro-Manager
+ * @author Amitabh Verma (averma@mbl.edu), Grant Harris (gharris@mbl.edu)
+ * Marine Biological Laboratory, Woods Hole, Mass.
+ * 
  */
+
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.net.URL;
@@ -33,13 +39,6 @@ import java.util.Arrays;
 import javax.swing.JFrame;
 import org.micromanager.internalinterfaces.AcqSettingsListener;
 
-/**
- * FrameAveragerControls User interface, input form for Frame Averaging.
- *
- * @author Amitabh Verma, averma@mbl.edu
- * @author Grant Harris, gharris@mbl.edu at the Marine Biological Laboratory,
- * Woods Hole, Mass.
- */
 public class FrameAveragerControls extends javax.swing.JFrame implements AcqSettingsListener {
 
     /* TODO

@@ -25,14 +25,16 @@ package edu.mbl.cdp.frameaverage;
  * The views and conclusions contained in the software and documentation are those of 
  * the authors and should not be interpreted as representing official policies, 
  * either expressed or implied, of any organization.
+ * 
+ * Multiple-Frame Averaging plug-in for Micro-Manager
+ * @author Amitabh Verma (averma@mbl.edu), Grant Harris (gharris@mbl.edu)
+ * Marine Biological Laboratory, Woods Hole, Mass.
+ * 
  */
+
 import ij.ImageStack;
 import ij.gui.ImageWindow;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 import mmcorej.CMMCore;
-import org.micromanager.MMOptions;
 import org.micromanager.acquisition.AcquisitionVirtualStack;
 import org.micromanager.acquisition.AcquisitionWrapperEngine;
 import org.micromanager.acquisition.VirtualAcquisitionDisplay;
@@ -41,12 +43,6 @@ import org.micromanager.utils.GUIUtils;
 import org.micromanager.utils.ImageFocusListener;
 import org.micromanager.utils.ReportingUtils;
 
-/**
- *
- * @author Amitabh Verma, averma@mbl.edu
- * @author Grant Harris, gharris@mbl.edu at the Marine Biological Laboratory,
- * Woods Hole, Mass.
- */
 public class FrameAveragerRunnable implements Runnable, ImageFocusListener {
 
     CMMCore core_;
@@ -185,7 +181,11 @@ public class FrameAveragerRunnable implements Runnable, ImageFocusListener {
         
         if (!focusedWindow.isClosed()) {
             ImageStack ImpStack = focusedWindow.getImagePlus().getImageStack();
-            display_ = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
+            if (ImpStack instanceof AcquisitionVirtualStack) {
+                display_ = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
+            } else {
+                display_ = null;
+            }
         }
     }
 }

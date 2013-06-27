@@ -25,6 +25,11 @@ package edu.mbl.cdp.frameaverage;
  * The views and conclusions contained in the software and documentation are those of 
  * the authors and should not be interpreted as representing official policies, 
  * either expressed or implied, of any organization.
+ * 
+ * Multiple-Frame Averaging plug-in for Micro-Manager
+ * @author Amitabh Verma (averma@mbl.edu), Grant Harris (gharris@mbl.edu)
+ * Marine Biological Laboratory, Woods Hole, Mass.
+ * 
  */
 
 import mmcorej.CMMCore;
@@ -34,15 +39,6 @@ import org.micromanager.acquisition.TaggedImageQueue;
 import org.micromanager.api.DataProcessor;
 import org.micromanager.utils.MDUtils;
 import org.micromanager.utils.ReportingUtils;
-
-/**
- * FrameAveragerProcessor is the DataProcessor<TaggedImage> that 
- * does the averaging...
- * 
- * @author Amitabh Verma, averma@mbl.edu
- * @author Grant Harris, gharris@mbl.edu 
- * at the Marine Biological Laboratory, Woods Hole, Mass.
- */
 
 public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 
