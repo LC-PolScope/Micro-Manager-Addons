@@ -36,9 +36,6 @@ import java.awt.Cursor;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Calendar;
 import javax.swing.JFrame;
@@ -48,7 +45,7 @@ import org.micromanager.utils.ReportingUtils;
 
 public class About extends javax.swing.JFrame {
 
-  public static final String BugPageLink_ = "https://www.openpolscope.org/mantis/";
+  public static final String BugPageLink_ = "http://www.openpolscope.org/mantis/";
   public static final String BugPageLinkLABEL_ = "<html><a href=" + BugPageLink_ + ">Web Page</a>";
   
   public static final String WebPageLink_ = "http://www.openpolscope.org/pages/MMPlugin_Frame_Averager.htm";
@@ -162,7 +159,7 @@ public class About extends javax.swing.JFrame {
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("<html><a href=\"\">Bugs and Feature Requests</a>");
-        jLabel2.setToolTipText("Email: rudolfo@mbl.edu");
+        jLabel2.setToolTipText("Email: feedback@openpolscope.org");
         jLabel2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel2MouseClicked(evt);

@@ -123,7 +123,7 @@
       <Properties>
         <Property name="horizontalAlignment" type="int" value="0"/>
         <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;a href=&quot;&quot;&gt;Bugs and Feature Requests&lt;/a&gt;"/>
-        <Property name="toolTipText" type="java.lang.String" value="Email: rudolfo@mbl.edu"/>
+        <Property name="toolTipText" type="java.lang.String" value="Email: feedback@openpolscope.org"/>
       </Properties>
       <Events>
         <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel2MouseClicked"/>
