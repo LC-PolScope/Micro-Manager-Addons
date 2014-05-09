@@ -99,13 +99,13 @@
           <Font name="Tahoma" size="11" style="1"/>
         </Property>
         <Property name="horizontalAlignment" type="int" value="0"/>
-        <Property name="text" type="java.lang.String" value="Version 1.0"/>
+        <Property name="text" type="java.lang.String" value="Version 1.03b (Compatible for Micro-Manager 1.4.13 - 1.4.15)"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="labelFooter">
       <Properties>
         <Property name="horizontalAlignment" type="int" value="0"/>
-        <Property name="text" type="java.lang.String" value="Marine Biological Laboratory &#xa9; 2009 - 2013"/>
+        <Property name="text" type="java.lang.String" value="Marine Biological Laboratory &#xa9; 2009 - 2014"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="labelWebPage">

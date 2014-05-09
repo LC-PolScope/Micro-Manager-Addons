@@ -32,41 +32,80 @@ package edu.mbl.cdp.frameaverage;
  * 
  */
 
+import ij.ImageStack;
+import ij.gui.ImageWindow;
+import java.awt.Component;
 import java.util.prefs.Preferences;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 import org.micromanager.MMOptions;
+import org.micromanager.acquisition.AcquisitionVirtualStack;
 import org.micromanager.acquisition.AcquisitionWrapperEngine;
+import org.micromanager.acquisition.SimpleWindowControls;
+import org.micromanager.acquisition.VirtualAcquisitionDisplay;
 import org.micromanager.api.DataProcessor;
+import org.micromanager.utils.GUIUtils;
+import org.micromanager.utils.ImageFocusListener;
 import org.micromanager.utils.ReportingUtils;
 
-public class FrameAverager {
+public class FrameAverager  implements ImageFocusListener {
 
     static final String METADATAKEY = "FramesAveraged";
-    CMMCore core_;
+    CMMCore core_;    
     AcquisitionWrapperEngine engineWrapper_;
-//    FrameAveragerRunnable runnable;
+
     FrameAveragerProcessor processor;
-    private FrameAveragerControls controlFrame_;
+    public FrameAveragerControls controlFrame_;
     
     public boolean debugLogEnabled_ = false;
     private boolean enabled_;
-    int numberFrames;
+    public int numberFrames = 4; // 4 frames by default
     int[] avoidDisplayChs_ = null;
     int[] avoidEngineChs_ = null;
     // shared...
     public TaggedImage[] taggedImageArray = null;
+    
+    public VirtualAcquisitionDisplay display_;    
+    public VirtualAcquisitionDisplay displayLive_;    
+    public JLabel displayLiveLabel;
+        
+    boolean isAdditionalDelayReg = false;
+    static String CameraNameProperty = "CameraName";
+    static String[] AdditionalDelayCams = {"Retiga 4000R"};
 
     public FrameAverager(AcquisitionWrapperEngine engineWrapper, CMMCore core) {
 
         engineWrapper_ = engineWrapper;
         core_ = core;
-        // 4 frames by default
-        numberFrames = 4;
+        
+        additionalDelayCheck();
         setNumberFrames(numberFrames);
         getDebugOptions();
+        
+        GUIUtils.registerImageFocusListener(this); // Image Window listener
     }
+    
+    
+    final void additionalDelayCheck() {
+        try {
+            String cam = core_.getCameraDevice();
+            String camName = core_.getProperty(cam, CameraNameProperty);
+            for (int i=0; i < AdditionalDelayCams.length; i++) {
+                if (camName.equals(AdditionalDelayCams[i])) {
+                    isAdditionalDelayReg = true;
+                } else {
+                    isAdditionalDelayReg = false;
+                }
+            }
+        } catch (Exception ex) {
+            isAdditionalDelayReg = false;
+            ReportingUtils.logError(ex);
+        }        
+    }
+
     
     public void UpdateEngineAndCore() {
         engineWrapper_ = TaggedFrameAverager.getAcquisitionWrapperEngine();
@@ -175,6 +214,14 @@ public class FrameAverager {
         } catch (Exception ex) {
         }
     }
+    
+    public void acquireImagesFromRunningSequence() {
+        processor.runAcquireFromRunningSequence();
+    }
+    
+    public void acquireImagesStartSequence() {
+        processor.runAcquireStartSequence();
+    }
 
     public DataProcessor<TaggedImage> getDataProcessor() {
         return processor.getDataProcessor();
@@ -185,6 +232,48 @@ public class FrameAverager {
             controlFrame_ = new FrameAveragerControls(this);
         }
         return controlFrame_;
+    }
+    
+    
+    @Override
+    public void focusReceived(ImageWindow focusedWindow) {
+        // discard if closed
+        if (focusedWindow == null) {
+            return;
+        }
+        // discard Snap/Live Window
+        if (focusedWindow != null) {
+            if (focusedWindow.getTitle().startsWith("Snap/Live Window")) {
+                ImageStack ImpStack = focusedWindow.getImagePlus().getImageStack();
+                if (ImpStack instanceof AcquisitionVirtualStack) {
+                    displayLive_ = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
+                    Component[] comps = focusedWindow.getComponents();
+                    SimpleWindowControls swc = (SimpleWindowControls) comps[1];
+                    comps = swc.getComponents();
+                    JPanel jp = (JPanel) comps[1];
+                    comps = jp.getComponents();
+                    displayLiveLabel = (JLabel) comps[1];
+                } else {
+                    displayLive_ = null;
+                }
+                return;
+            }     
+        }
+        
+        if (!focusedWindow.isClosed()) {
+            ImageStack ImpStack = focusedWindow.getImagePlus().getImageStack();
+            VirtualAcquisitionDisplay display;
+            if (ImpStack instanceof AcquisitionVirtualStack) {
+                display = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
+                if (display.acquisitionIsRunning()) {
+                    display_ = display;
+                }
+            } else {
+                if (display_!=null && !display_.acquisitionIsRunning()) {
+                    display_ = null;
+                }
+            }
+        }
     }
 
 }

@@ -138,10 +138,10 @@ public class About extends javax.swing.JFrame {
 
         labelVersion.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         labelVersion.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        labelVersion.setText("Version 1.0");
+        labelVersion.setText("Version 1.03b (Compatible for Micro-Manager 1.4.13 - 1.4.15)");
 
         labelFooter.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        labelFooter.setText("Marine Biological Laboratory © 2009 - 2013");
+        labelFooter.setText("Marine Biological Laboratory © 2009 - 2014");
 
         labelWebPage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelWebPage.setText("<html><a href=\"\">Web Page</a>");

@@ -43,46 +43,23 @@ import org.micromanager.utils.GUIUtils;
 import org.micromanager.utils.ImageFocusListener;
 import org.micromanager.utils.ReportingUtils;
 
-public class FrameAveragerRunnable implements Runnable, ImageFocusListener {
+public class FrameAveragerRunnable implements Runnable {
 
-    CMMCore core_;
-    ScriptInterface gui_;    
+    CMMCore core_;     
     AcquisitionWrapperEngine engineWrapper_;
-    VirtualAcquisitionDisplay display_;
     boolean isDisplayControlsEnabled = false;
     FrameAverager fa;
-        
-    boolean isAdditionalDelayReg = false;
-    static String CameraNameProperty = "CameraName";
-    static String[] AdditionalDelayCams = {"Retiga 4000R"};
+    
     
     FrameAveragerRunnable(FrameAverager fa) {
         this.fa = fa;
         this.core_ = fa.core_;
         this.engineWrapper_ = fa.engineWrapper_;
-        additionalDelayCheck();
-        fa.getDebugOptions();
-        GUIUtils.registerImageFocusListener(this); // Image Window listener
+        
+        fa.getDebugOptions();        
     }
     
     
-    final void additionalDelayCheck() {
-        try {
-            String cam = core_.getCameraDevice();
-            String camName = core_.getProperty(cam, CameraNameProperty);
-            for (int i=0; i < AdditionalDelayCams.length; i++) {
-                if (camName.equals(AdditionalDelayCams[i])) {
-                    isAdditionalDelayReg = true;
-                } else {
-                    isAdditionalDelayReg = false;
-                }
-            }
-        } catch (Exception ex) {
-            isAdditionalDelayReg = false;
-            ReportingUtils.logError(ex);
-        }        
-    }
-
     @Override
     public void run() {
         if (fa.numberFrames > 1) {
@@ -118,22 +95,28 @@ public class FrameAveragerRunnable implements Runnable, ImageFocusListener {
             
             while (core_.getRemainingImageCount() > 0 || core_.isSequenceRunning(cam)) {
                 if (core_.getRemainingImageCount() > 0) {
-                    if (isAdditionalDelayReg) {
+                    if (fa.isAdditionalDelayReg) {
                         Thread.sleep(250);
                     }
                    fa.taggedImageArray[frame] = core_.popNextTaggedImage();
                    frame++;
                     //if (fa.processor.isDisplayAvailable) {
-                        if (display_ != null) {
-                            if (display_.isActiveDisplay()) {
-                                display_.displayStatusLine("Image Avg. Acquiring No. " + frame);
+                        if (fa.display_ != null) {
+                            if (fa.display_.acquisitionIsRunning()) {
+                                fa.display_.displayStatusLine("Image Avg. Acquiring No. " + frame);
                             }
                         }
                     //}
                 }
              }
             long itTook = System.currentTimeMillis() - now;
-            core_.stopSequenceAcquisition(cam);  
+            try {
+                core_.stopSequenceAcquisition();  
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                ReportingUtils.logMessage("ERROR: FrameAvg: " + ex.getMessage());
+            }
+            
             if (fa.debugLogEnabled_) {
                 ReportingUtils.logMessage("Averaging Acquisition took: " + itTook + " milliseconds for "+fa.numberFrames + " frames");
             }
@@ -165,27 +148,5 @@ public class FrameAveragerRunnable implements Runnable, ImageFocusListener {
         }
     }
     
-
-    @Override
-    public void focusReceived(ImageWindow focusedWindow) {
-        // discard if closed
-        if (focusedWindow == null) {
-            return;
-        }
-        // discard Snap/Live Window
-        if (focusedWindow != null) {
-            if (focusedWindow.getTitle().startsWith("Snap/Live Window")) {
-                return;
-            }     
-        }
-        
-        if (!focusedWindow.isClosed()) {
-            ImageStack ImpStack = focusedWindow.getImagePlus().getImageStack();
-            if (ImpStack instanceof AcquisitionVirtualStack) {
-                display_ = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
-            } else {
-                display_ = null;
-            }
-        }
-    }
+    
 }

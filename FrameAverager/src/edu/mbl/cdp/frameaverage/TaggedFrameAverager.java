@@ -34,6 +34,7 @@ package edu.mbl.cdp.frameaverage;
 
 import javax.swing.JFrame;
 import mmcorej.CMMCore;
+import org.micromanager.MMStudioMainFrame;
 import org.micromanager.acquisition.AcquisitionWrapperEngine;
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
@@ -43,18 +44,18 @@ public class TaggedFrameAverager implements MMPlugin {
     public static final String menuName = "Frame Averager";
     public static final String tooltipDescription = "Multiple-Frame Averaging";
     //
+    public static JFrame frame;
     FrameAverager fa;
     static ScriptInterface gui;    
     
     @Override
     public void setApp(ScriptInterface si) {
-        
         gui = si;                
         fa = new FrameAverager(getAcquisitionWrapperEngine(), gui.getMMCore());
     }    
     
     public static AcquisitionWrapperEngine getAcquisitionWrapperEngine() {
-        AcquisitionWrapperEngine engineWrapper = (AcquisitionWrapperEngine) gui.getAcquisitionEngine();
+        AcquisitionWrapperEngine engineWrapper = (AcquisitionWrapperEngine) MMStudioMainFrame.getInstance().getAcquisitionEngine();
         return engineWrapper;
     }
     
@@ -68,8 +69,11 @@ public class TaggedFrameAverager implements MMPlugin {
 
     @Override
     public void show() {
-        JFrame frame = fa.getControlFrame();
-        gui.addMMBackgroundListener(frame);
+        if (frame == null) {
+            frame = fa.getControlFrame();
+            gui.addMMBackgroundListener(frame);
+            frame.setLocation(fa.controlFrame_.FrameXpos, fa.controlFrame_.FrameYpos);
+        }
         frame.setVisible(true);
     }
 

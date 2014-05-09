@@ -32,11 +32,17 @@ package edu.mbl.cdp.frameaverage;
  * 
  */
 
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.prefs.Preferences;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import org.micromanager.internalinterfaces.AcqSettingsListener;
 
 public class FrameAveragerControls extends javax.swing.JFrame implements AcqSettingsListener {
@@ -54,11 +60,21 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
      * Then test with VirtualChannelInsertThingie
      */
     //private final CMMCore core_;
+    static FrameAveragerControls frame;
     private FrameAverager fa;
     //private AcquisitionWrapperEngine engine_ = null;
     //private boolean enabled_ = false;
     private static JFrame About;
 
+    private String lastChannelAvoidanceStr = "";
+    
+    public static final Preferences FrameAveragerControlPrefs = Preferences.userNodeForPackage(FrameAveragerControls.class);
+    public final String FrameXposKey = "PREF_FrameX";
+    public final String FrameYposKey = "PREF_FrameY";
+    public final String NumberOfFramesKey = "PREF_NumberOfFramesKey";
+    public int FrameXpos = 300;
+    public int FrameYpos = 300;
+    
     /**
      * Creates new form FrameAveragerControls
      */
@@ -69,9 +85,16 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         URL url = this.getClass().getResource("frameIcon.png");
         Image im = Toolkit.getDefaultToolkit().getImage(url);
         setIconImage(im);
+        getPreferences();
+        numFramesField.setText(String.valueOf(fa.numberFrames));
+        setDefaultCloseOperation( JFrame.DO_NOTHING_ON_CLOSE );
+        
+        lastChannelAvoidanceStr = channelsToAvoid.getText();
         // add as Frame to show with Toolbar
         // ToolbarMMX.addFrameToShow(this);
         //initPlugin();
+        
+        frame = this;
     }
 
     
@@ -93,6 +116,22 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
             // Add disable avoid channels input box
             updateStatus();
         }
+    }
+    
+    private void getPreferences() {
+        FrameXpos = FrameAveragerControlPrefs.getInt(FrameXposKey, FrameXpos);
+        FrameYpos = FrameAveragerControlPrefs.getInt(FrameYposKey, FrameYpos);
+        fa.numberFrames = FrameAveragerControlPrefs.getInt(NumberOfFramesKey, fa.numberFrames);
+    }
+    
+    private void setPreferences() {
+        
+        FrameXpos = this.getX();
+        FrameYpos = this.getY();
+        
+        FrameAveragerControlPrefs.putInt(FrameXposKey, FrameXpos);
+        FrameAveragerControlPrefs.putInt(FrameYposKey, FrameYpos);
+        FrameAveragerControlPrefs.putInt(NumberOfFramesKey, fa.numberFrames);
     }
 
     /**
@@ -123,6 +162,9 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosed(java.awt.event.WindowEvent evt) {
                 formWindowClosed(evt);
+            }
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
             }
         });
         addFocusListener(new java.awt.event.FocusAdapter() {
@@ -242,23 +284,35 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
     }// </editor-fold>//GEN-END:initComponents
 
   private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+      
   }//GEN-LAST:event_formWindowClosed
 
   private void enabledCheckBox_ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enabledCheckBox_ActionPerformed
-      update();
+      if (!showingMsg) {
+        if (fa.core_.isSequenceRunning()) {
+            enabledCheckBox_.setSelected(!enabledCheckBox_.isSelected());
+            FrameAveragerControls.showMessage("Live mode is running ! Please stop before enabling/disabling.");          
+            return;
+        } else if (TaggedFrameAverager.gui.isAcquisitionRunning()) {
+            enabledCheckBox_.setSelected(!enabledCheckBox_.isSelected());
+            FrameAveragerControls.showMessage("Acquisition is running ! Please stop before enabling/disabling.");          
+            return;
+        }
+        update();
+      } else {
+          enabledCheckBox_.setSelected(!enabledCheckBox_.isSelected());
+      }
   }//GEN-LAST:event_enabledCheckBox_ActionPerformed
 
   private void numFramesFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_numFramesFieldActionPerformed
       updateNumFramesField();
   }//GEN-LAST:event_numFramesFieldActionPerformed
   private void channelsToAvoidActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_channelsToAvoidActionPerformed
-      updateChannelsToAvoid();
-      update();
+      channelAvoidance();
   }//GEN-LAST:event_channelsToAvoidActionPerformed
 
   private void channelsToAvoidFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_channelsToAvoidFocusLost
-      updateChannelsToAvoid();
-      update();
+      channelAvoidance();
   }//GEN-LAST:event_channelsToAvoidFocusLost
 
   private void numFramesFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_numFramesFieldFocusLost
@@ -280,12 +334,67 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         fa.getDebugOptions();
     }//GEN-LAST:event_formFocusLost
 
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        if (fa.core_.isSequenceRunning()) {
+            if (enabledCheckBox_.isSelected()) {
+                setVisible( true );
+                FrameAveragerControls.showMessage("Live mode is running with FrameAverager ! Please stop Live before closing FrameAverager.");    
+            }
+        } else if (TaggedFrameAverager.gui.isAcquisitionRunning()) {
+            if (enabledCheckBox_.isSelected()) {
+                setVisible( true );
+                FrameAveragerControls.showMessage("Acquisition is running with FrameAverager ! Please stop Acquisition before closing FrameAverager.");    
+            }
+        } else {
+            if (enabledCheckBox_.isSelected()) {
+                enabledCheckBox_.setSelected(false);
+                update();
+            }
+            setVisible( false );
+            setPreferences();
+        }
+    }//GEN-LAST:event_formWindowClosing
+
     private void updateNumFramesField() {
         int num;
-        String str = numFramesField.getText().trim().toString();
-        num = (int) Integer.parseInt(str);
-        fa.setNumberFrames(num);
-        updateStatus();
+        if (!showingMsg) {
+            if (!numFramesField.getText().isEmpty()) {
+                String str = numFramesField.getText().trim().toString();
+                try {
+                 num = (int) Integer.parseInt(str);
+                } catch(NumberFormatException e) {
+                    System.out.println("CAUGHT: " + e.toString());
+                    System.out.println("Defaulting value to 4");
+                    num = 4;
+                }
+                fa.setNumberFrames(num);
+                updateStatus();
+            } else {
+                FrameAveragerControls.showMessage("Number of Image Frames to average has to be an Integer");    
+            }
+        } else {
+            numFramesField.setText(String.valueOf(fa.numberFrames));
+        }
+    }
+    
+    private void channelAvoidance() {
+        if (!showingMsg) {
+            if (!lastChannelAvoidanceStr.equals(channelsToAvoid.getText())) {
+                if (fa.core_.isSequenceRunning()) {
+                    channelsToAvoid.setText(lastChannelAvoidanceStr);
+                    FrameAveragerControls.showMessage("Live mode is running ! Please stop before chaging this field.");            
+                } else if (TaggedFrameAverager.gui.isAcquisitionRunning()) {
+                    channelsToAvoid.setText(lastChannelAvoidanceStr);
+                    FrameAveragerControls.showMessage("Acquisition is running ! Please stop before chaging this field.");            
+                } else {            
+                    updateChannelsToAvoid();
+                    update();
+                    lastChannelAvoidanceStr = channelsToAvoid.getText();
+                }
+            }
+        } else {
+            channelsToAvoid.setText(lastChannelAvoidanceStr);
+        }
     }
 
     private void updateChannelsToAvoid() {
@@ -415,7 +524,44 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         }
         return intArray;
     }
-//  public FrameAveragerControls getInstance() {
-//      return this;
-//  }
+    
+    public static void showMessage(String msg) {
+        showNonBlockingMessage(JOptionPane.WARNING_MESSAGE, TaggedFrameAverager.menuName, msg, getInstance());
+    }
+    
+    public static void showMessage(String title, String msg) {
+        showNonBlockingMessage(JOptionPane.WARNING_MESSAGE, title, msg, getInstance());
+    }
+    
+    static boolean showingMsg = false;
+    public static void showNonBlockingMessage(int msgType, String title, String message, Frame owningFrame_) {
+      if (null != owningFrame_) {
+         Object[] options = { "OK" };
+         final JOptionPane optionPane = new JOptionPane(message, msgType, JOptionPane.DEFAULT_OPTION, null, options);
+         /* the false parameter is for not modal */
+         final JDialog dialog = new JDialog(owningFrame_, title, false);
+         optionPane.addPropertyChangeListener(
+                 new PropertyChangeListener() {
+
+                    public void propertyChange(PropertyChangeEvent e) {
+                       String prop = e.getPropertyName();
+                       if (dialog.isVisible() && (e.getSource() == optionPane) && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
+                          dialog.setVisible(false);
+                          showingMsg = false;
+                       }
+                    }
+                 });         
+         
+         dialog.setContentPane(optionPane);
+         /* adapting the frame size to its content */
+         dialog.pack();
+         dialog.setLocationRelativeTo(owningFrame_);
+         dialog.setVisible(true);
+         showingMsg = true;
+      }
+   }
+    
+  public static FrameAveragerControls getInstance() {
+      return frame;
+  }
 }

@@ -75,9 +75,11 @@
     <format property="TODAY" pattern="MM-dd-yyyy" />
     </tstamp>
     
+    <!--
     <loadfile property="Version_Major" srcfile="..\..\PolScopeAPI\PsPluginsAppApi\src\edu\mbl\cdp\ps\Version_Major.txt"/>
     <loadfile property="Version_Minor" srcfile="..\..\PolScopeAPI\PsPluginsAppApi\src\edu\mbl\cdp\ps\Version_Minor.txt"/>
     <loadfile property="Version_Type" srcfile="..\..\PolScopeAPI\PsPluginsAppApi\src\edu\mbl\cdp\ps\Version_Type.txt"/>
+    -->
 
 
     <manifest file="MANIFEST.MF">
@@ -94,14 +96,7 @@
   <property name="MMPlugin_dir1" value="${work.dir}/mmplugins/FrameAverager.jar"/>
   <copy tofile="${MMPlugin_dir1}">
   <fileset file="${MMPlugin_dist1}"/>
-  </copy>
-  
-  <property name="MMPlugin_dist2" value="dist/FrameAverager.jar"/>
-  <property name="MMPlugin_dir2" value="../../../trunk/OpenPolScope_dist/mmplugins/FrameAverager.jar"/>
-  <copy tofile="${MMPlugin_dir2}">
-  <fileset file="${MMPlugin_dist2}"/>
-  </copy>
-  
+  </copy>  
 </target>   
   
 </project>

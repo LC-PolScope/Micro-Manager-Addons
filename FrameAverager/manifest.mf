@@ -5,6 +5,6 @@ Signature-Title: FrameAverager
 Signature-Vendor: Marine Biological Laboratory (Rudolf Oldenbourg)
 Application-Plugin: Micro-Manager
 Built-By: Amitabh
-Built-Version: 2.14b
-Built-Date: 06-26-2013
+Built-Version: ${Version_Major}.${Version_Minor}${Version_Type}
+Built-Date: 05-09-2014
 
