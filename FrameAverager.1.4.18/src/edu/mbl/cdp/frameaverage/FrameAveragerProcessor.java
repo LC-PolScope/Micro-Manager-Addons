@@ -49,6 +49,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
     //int numberFrames_ = 1;
     int imgDepth;
     int iNO = 0;
+    
     TaggedFrameAverager tfa;
 
     @Override
@@ -58,13 +59,18 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
         tfa.setApp(gui_);
         tfa.fa.processor = this;   
         tfa.frame = tfa.fa.getControlFrame();
-        tfa.fa.controlFrame_.setPluginEnabled(true);
+//        tfa.fa.controlFrame_.setPluginEnabled(true);
    }
 
     @Override
     protected void process() {
         try {            
             final TaggedImage taggedImage = poll();
+            
+            if (tfa.fa.engineWrapper_.isAcquisitionRunning() && !tfa.fa.isEnabledForImageAcquisition) {
+                produce(taggedImage);
+                return;
+            }
                         
             if (tfa.fa.numberFrames < 2) { // if MFA is disabled
                 if (taggedImage == null) { // EOL check
@@ -444,7 +450,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             tfa.gui.addMMBackgroundListener(tfa.frame);
         }
         tfa.frame.setVisible(true);
-        tfa.fa.controlFrame_.setPluginEnabled(true);
+//        tfa.fa.controlFrame_.setPluginEnabled(true);
    }
     
     @Override

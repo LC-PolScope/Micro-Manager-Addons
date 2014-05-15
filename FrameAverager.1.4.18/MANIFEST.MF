@@ -6,5 +6,5 @@ Signature-Vendor: Marine Biological Laboratory (Rudolf Oldenbourg)
 Application-Plugin: Micro-Manager
 Built-By: Amitabh
 Built-Version: ${Version_Major}.${Version_Minor}${Version_Type}
-Built-Date: 05-14-2014
+Built-Date: 05-15-2014
 

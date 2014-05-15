@@ -63,6 +63,7 @@ public class FrameAverager  implements ImageFocusListener {
     public FrameAveragerControls controlFrame_;
     
     public boolean debugLogEnabled_ = false;
+    public boolean isEnabledForImageAcquisition = false;
 
     public int numberFrames = 4; // 4 frames by default
     int[] avoidDisplayChs_ = null;
@@ -191,7 +192,9 @@ public class FrameAverager  implements ImageFocusListener {
     }
 
     public void attachDataProcessor() {
-        processor = new FrameAveragerProcessor();
+        if (processor==null) {
+            processor = new FrameAveragerProcessor();
+        }
         engineWrapper_.addImageProcessor(processor);
     }
 

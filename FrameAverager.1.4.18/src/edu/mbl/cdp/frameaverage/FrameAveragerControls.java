@@ -94,6 +94,7 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         // add as Frame to show with Toolbar
         // ToolbarMMX.addFrameToShow(this);
         //initPlugin();
+        updateStatus();
         this.pack();
         frame = this;
     }
@@ -103,19 +104,11 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
     public void settingsChanged() {        
         update();
     }
-    
-    public void setPluginEnabled(boolean bool) {
-        this.enabledCheckBox_.setSelected(bool);    
-        fa_.stopAndClearRunnable();
-        if (bool) {
-            fa_.attachRunnable();
-        }
-    }
-    
+        
     public void update() {
         if (this.enabledCheckBox_.isSelected()) {
             fa_.UpdateEngineAndCore();
-            fa_.enable(false);
+            //fa_.enable(false);
         }
 
         fa_.enable(this.enabledCheckBox_.isSelected());
@@ -125,6 +118,8 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
             // Add disable avoid channels input box
             updateStatus();
         }
+        
+        fa_.isEnabledForImageAcquisition = this.enabledCheckBox_.isSelected();
     }
     
     private void getPreferences() {
@@ -201,8 +196,7 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         jLabel1.setText("Number of Image Frames to average");
 
         enabledCheckBox_.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        enabledCheckBox_.setSelected(true);
-        enabledCheckBox_.setText("Enabled");
+        enabledCheckBox_.setText("Enable for Multi-D Image Acquisition");
         enabledCheckBox_.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 enabledCheckBox_ActionPerformed(evt);
@@ -254,7 +248,7 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                             .add(jLabel2)
                             .add(jLabel1))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 33, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                             .add(org.jdesktop.layout.GroupLayout.TRAILING, channelsToAvoid, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 99, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                             .add(org.jdesktop.layout.GroupLayout.TRAILING, numFramesField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 99, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
@@ -437,7 +431,7 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
             String avgString;
             String avoidString = "";
 
-            if (fa_.numberFrames < 1 || !enabledCheckBox_.isSelected()) {
+            if (fa_.numberFrames < 2) {
                 avgString = "Averaging is Disabled.";
                 avoidString = "";
             } else {
