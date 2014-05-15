@@ -58,13 +58,14 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
         tfa.setApp(gui_);
         tfa.fa.processor = this;   
         tfa.frame = tfa.fa.getControlFrame();
+        tfa.fa.controlFrame_.setPluginEnabled(true);
    }
 
     @Override
     protected void process() {
         try {            
             final TaggedImage taggedImage = poll();
-            
+                        
             if (tfa.fa.numberFrames < 2) { // if MFA is disabled
                 if (taggedImage == null) { // EOL check
                     produce(TaggedImageQueue.POISON);
@@ -438,23 +439,19 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             tfa.fa.processor = this;
             tfa.frame = tfa.fa.getControlFrame();
             tfa.gui.addMMBackgroundListener(tfa.frame);
-            tfa.frame.setLocation(tfa.fa.controlFrame_.FrameXpos, tfa.fa.controlFrame_.FrameYpos);
-            tfa.frame.setVisible(true);
         } else if (tfa.frame==null) {            
             tfa.frame = tfa.fa.getControlFrame();
             tfa.gui.addMMBackgroundListener(tfa.frame);
-            tfa.frame.setLocation(tfa.fa.controlFrame_.FrameXpos, tfa.fa.controlFrame_.FrameYpos);
-            tfa.frame.setVisible(true);
-        } else {
-            tfa.frame.setVisible(true);
         }
+        tfa.frame.setVisible(true);
+        tfa.fa.controlFrame_.setPluginEnabled(true);
    }
     
     @Override
    public void dispose() {
       if (tfa.frame != null) {
          tfa.frame.dispose();
-         tfa.frame = null;
+         tfa.frame = null;         
       }
    }
 }

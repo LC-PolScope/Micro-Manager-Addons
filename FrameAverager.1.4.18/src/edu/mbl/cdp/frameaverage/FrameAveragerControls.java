@@ -89,12 +89,12 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         fa.setNumberFrames(fa.numberFrames);
         numFramesField.setText(String.valueOf(fa.numberFrames));
         setDefaultCloseOperation( JFrame.DO_NOTHING_ON_CLOSE );
-        
+        this.setLocation(FrameXpos, FrameYpos);
         lastChannelAvoidanceStr = channelsToAvoid.getText();
         // add as Frame to show with Toolbar
         // ToolbarMMX.addFrameToShow(this);
         //initPlugin();
-        
+        this.pack();
         frame = this;
     }
 
@@ -102,6 +102,14 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
     @Override
     public void settingsChanged() {        
         update();
+    }
+    
+    public void setPluginEnabled(boolean bool) {
+        this.enabledCheckBox_.setSelected(bool);    
+        fa_.stopAndClearRunnable();
+        if (bool) {
+            fa_.attachRunnable();
+        }
     }
     
     public void update() {
@@ -381,19 +389,21 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
     
     private void channelAvoidance() {
         if (!showingMsg) {
-            if (!lastChannelAvoidanceStr.equals(channelsToAvoid.getText())) {
-                if (fa_.core_.isSequenceRunning()) {
-                    channelsToAvoid.setText(lastChannelAvoidanceStr);
-                    FrameAveragerControls.showMessage("Live mode is running ! Please stop before chaging this field.");            
-                } else if (fa_.tfa_.gui.isAcquisitionRunning()) {
-                    channelsToAvoid.setText(lastChannelAvoidanceStr);
-                    FrameAveragerControls.showMessage("Acquisition is running ! Please stop before chaging this field.");            
-                } else {            
-                    updateChannelsToAvoid();
-                    update();
-                    lastChannelAvoidanceStr = channelsToAvoid.getText();
+                if (!lastChannelAvoidanceStr.equals(channelsToAvoid.getText())) {
+                    if (fa_.core_.isSequenceRunning()) {
+                        channelsToAvoid.setText(lastChannelAvoidanceStr);
+                        FrameAveragerControls.showMessage("Live mode is running ! Please stop before chaging this field.");            
+                    } else if (fa_.tfa_.gui.isAcquisitionRunning()) {
+                        channelsToAvoid.setText(lastChannelAvoidanceStr);
+                        FrameAveragerControls.showMessage("Acquisition is running ! Please stop before chaging this field.");            
+                    } else {            
+                        updateChannelsToAvoid();
+                        fa_.stopAndClearRunnable();
+                        fa_.attachRunnable();
+
+                        lastChannelAvoidanceStr = channelsToAvoid.getText();
+                    }
                 }
-            }
         } else {
             channelsToAvoid.setText(lastChannelAvoidanceStr);
         }

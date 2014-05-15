@@ -63,7 +63,7 @@ public class FrameAverager  implements ImageFocusListener {
     public FrameAveragerControls controlFrame_;
     
     public boolean debugLogEnabled_ = false;
-    private boolean enabled_;
+
     public int numberFrames = 4; // 4 frames by default
     int[] avoidDisplayChs_ = null;
     int[] avoidEngineChs_ = null;
@@ -127,7 +127,9 @@ public class FrameAverager  implements ImageFocusListener {
         Runnable setPauseAndAcquire = new FrameAveragerRunnable(this);
         // The runnable is attached to the channels for which there will be frame averaging.
         // 'Engine channels' to avoid are not included.
-        if (avoidEngineChs_ == null) {
+        if (avoidEngineChs_ == null || engineWrapper_.getChannels().size()==1) {
+            engineWrapper_.attachRunnable(-1, -1, -1, -1, setPauseAndAcquire); // t, p, s, c
+        } else if (engineWrapper_.getChannels().size() < avoidEngineChs_[avoidEngineChs_.length-1]) {
             engineWrapper_.attachRunnable(-1, -1, -1, -1, setPauseAndAcquire); // t, p, s, c
         } else {            
             for (int i = 0; i < engineWrapper_.getChannels().size(); i++) {
@@ -174,12 +176,10 @@ public class FrameAverager  implements ImageFocusListener {
         if (enableAveraging) {
             startProcessor();
             attachRunnable();
-            enabled_ = true;
         } else {
             // Disable
             stopAndClearProcessor();
             stopAndClearRunnable();
-            enabled_ = false;
         }
     }
 
@@ -248,16 +248,17 @@ public class FrameAverager  implements ImageFocusListener {
         }
         // discard Snap/Live Window
         if (focusedWindow != null) {
-            if (focusedWindow.getTitle().startsWith("Snap/Live Window")) {
+            String str = focusedWindow.getTitle();
+            if (focusedWindow.getTitle().startsWith("Snap/Live Window") ||  str.equals(" (100%)")) {
                 ImageStack ImpStack = focusedWindow.getImagePlus().getImageStack();
                 if (ImpStack instanceof AcquisitionVirtualStack) {
                     displayLive_ = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
                     Component[] comps = focusedWindow.getComponents();
                     SimpleWindowControls swc = (SimpleWindowControls) comps[1];
                     comps = swc.getComponents();
-                    JPanel jp = (JPanel) comps[1];
+                    JPanel jp = (JPanel) comps[comps.length-1];
                     comps = jp.getComponents();
-                    displayLiveLabel = (JLabel) comps[1];
+                    displayLiveLabel = (JLabel) comps[comps.length-1];
                 } else {
                     displayLive_ = null;
                 }
@@ -272,6 +273,7 @@ public class FrameAverager  implements ImageFocusListener {
                 display = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
                 if (display.acquisitionIsRunning()) {
                     display_ = display;
+                    display_.show();
                 }
             } else {
                 if (display_!=null && !display_.acquisitionIsRunning()) {
