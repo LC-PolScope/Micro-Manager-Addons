@@ -2,3 +2,8 @@
 /FrameAverager.1.4.16/build/
 /FrameAverager/build/
 .gitignore
+/FrameAverager/nbproject/private/
+/FrameAverager.1.4.16/nbproject/private/
+/FrameAverager.1.4.18/nbproject/private/
+/BitDepthDowngrader/nbproject/private/
+/BitDepthDowngrader/build/

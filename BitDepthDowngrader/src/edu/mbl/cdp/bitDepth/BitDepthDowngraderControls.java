@@ -1,0 +1,312 @@
+package edu.mbl.cdp.bitDepth;
+
+/*
+ * Copyright © 2009 – 2013, Marine Biological Laboratory
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, 
+ * this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, 
+ * this list of conditions and the following disclaimer in the documentation 
+ * and/or other materials provided with the distribution.
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND 
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * The views and conclusions contained in the software and documentation are those of 
+ * the authors and should not be interpreted as representing official policies, 
+ * either expressed or implied, of any organization.
+ * 
+ * Multiple-Frame Averaging plug-in for Micro-Manager
+ * @author Amitabh Verma (averma@mbl.edu), Grant Harris (gharris@mbl.edu)
+ * Marine Biological Laboratory, Woods Hole, Mass.
+ * 
+ */
+
+import java.awt.Frame;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.net.URL;
+import java.util.prefs.Preferences;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import org.micromanager.internalinterfaces.AcqSettingsListener;
+
+public class BitDepthDowngraderControls extends javax.swing.JFrame implements AcqSettingsListener {
+
+    /* TODO
+     * Start not-Enabled
+     * Add #frames peristence and avoided channels
+     * Disable channels to avoid when averaging is enabled
+     * Disable #frame field during acquisition.
+     *   Is there a signal (e.g. propertychanged) that can be listened for?
+     * 
+     * Testing
+ 
+     * Add VirtChannels to avoid input field
+     * Then test with VirtualChannelInsertThingie
+     */
+    //private final CMMCore core_;
+    static BitDepthDowngraderControls frame;
+    private BitDepthDowngrader fa_;
+    //private AcquisitionWrapperEngine engine_ = null;
+    //private boolean enabled_ = false;
+    private static JFrame About;
+    
+    public static final Preferences ControlPrefs = Preferences.userNodeForPackage(BitDepthDowngraderControls.class);
+    public final String FrameXposKey = "PREF_FrameX";
+    public final String FrameYposKey = "PREF_FrameY";
+    public int FrameXpos = 300;
+    public int FrameYpos = 300;
+    
+    /**
+     * Creates new form BitDepthDowngraderControls
+     */
+    public BitDepthDowngraderControls(BitDepthDowngrader fa) {
+        this.fa_ = fa;
+        //core_ = fa.core_;
+        initComponents();
+        URL url = this.getClass().getResource("frameIcon.png");
+        Image im = Toolkit.getDefaultToolkit().getImage(url);
+        setIconImage(im);
+        getPreferences();
+        setDefaultCloseOperation( JFrame.DO_NOTHING_ON_CLOSE );
+        this.setLocation(FrameXpos, FrameYpos);
+        // add as Frame to show with Toolbar
+        // ToolbarMMX.addFrameToShow(this);
+        //initPlugin();
+        this.pack();
+        frame = this;
+    }
+
+    
+    @Override
+    public void settingsChanged() {        
+        update();
+    }
+        
+    public void update() {
+        if (this.enabledCheckBox_.isSelected()) {
+            fa_.UpdateEngine();
+            //fa_.enable(false);
+        }
+
+        fa_.enable(this.enabledCheckBox_.isSelected());
+        if (!this.enabledCheckBox_.isSelected()) {
+        } else {
+            // Add disable avoid channels input box
+        }
+        
+        fa_.isEnabledForImageAcquisition = this.enabledCheckBox_.isSelected();
+    }
+    
+    private void getPreferences() {
+        FrameXpos = ControlPrefs.getInt(FrameXposKey, FrameXpos);
+        FrameYpos = ControlPrefs.getInt(FrameYposKey, FrameYpos);
+    }
+    
+    private void setPreferences() {
+        
+        FrameXpos = this.getX();
+        FrameYpos = this.getY();
+        
+        ControlPrefs.putInt(FrameXposKey, FrameXpos);
+        ControlPrefs.putInt(FrameYposKey, FrameYpos);
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        enabledCheckBox_ = new javax.swing.JCheckBox();
+        jLabel3 = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("BitDepthDowngrader");
+        setBounds(new java.awt.Rectangle(300, 300, 150, 150));
+        setMinimumSize(new java.awt.Dimension(150, 150));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
+        addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                formFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                formFocusLost(evt);
+            }
+        });
+
+        enabledCheckBox_.setText("Enable for Multi-D Image Acquisition");
+        enabledCheckBox_.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                enabledCheckBox_ActionPerformed(evt);
+            }
+        });
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel3.setText("Scales true 16-bit images to  8-bit");
+
+        jMenu1.setText("Help");
+
+        jMenuItem1.setText("About");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
+        jMenuBar1.add(jMenu1);
+
+        setJMenuBar(jMenuBar1);
+
+        org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(layout.createSequentialGroup()
+                .addContainerGap()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jLabel3)
+                    .add(enabledCheckBox_))
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(layout.createSequentialGroup()
+                .addContainerGap()
+                .add(jLabel3)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 15, Short.MAX_VALUE)
+                .add(enabledCheckBox_)
+                .addContainerGap())
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+  private void enabledCheckBox_ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enabledCheckBox_ActionPerformed
+      if (!showingMsg) {
+        if (fa_.core_.isSequenceRunning()) {
+            enabledCheckBox_.setSelected(!enabledCheckBox_.isSelected());
+            BitDepthDowngraderControls.showMessage("Live mode is running ! Please stop before enabling/disabling.");          
+            return;
+        } else if (fa_.gui_.isAcquisitionRunning()) {
+            enabledCheckBox_.setSelected(!enabledCheckBox_.isSelected());
+            BitDepthDowngraderControls.showMessage("Acquisition is running ! Please stop before enabling/disabling.");          
+            return;
+        }
+        update();
+      } else {
+          enabledCheckBox_.setSelected(!enabledCheckBox_.isSelected());
+      }
+  }//GEN-LAST:event_enabledCheckBox_ActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        if (About == null) {
+            About = new About(this);
+        }
+        About.setVisible(true);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void formFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_formFocusGained
+        fa_.getDebugOptions();
+    }//GEN-LAST:event_formFocusGained
+
+    private void formFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_formFocusLost
+        fa_.getDebugOptions();
+    }//GEN-LAST:event_formFocusLost
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        if (fa_.core_.isSequenceRunning()) {
+            if (enabledCheckBox_.isSelected()) {
+                setVisible( true );
+                BitDepthDowngraderControls.showMessage("Live mode is running with FrameAverager ! Please stop Live before closing FrameAverager.");    
+            }
+        } else if (fa_.gui_.isAcquisitionRunning()) {
+            if (enabledCheckBox_.isSelected()) {
+                setVisible( true );
+                BitDepthDowngraderControls.showMessage("Acquisition is running with FrameAverager ! Please stop Acquisition before closing FrameAverager.");    
+            }
+        } else {
+            if (enabledCheckBox_.isSelected()) {
+                enabledCheckBox_.setSelected(false);
+                update();
+            }
+            setVisible( false );
+            setPreferences();
+            fa_.processor.dispose();
+        }
+    }//GEN-LAST:event_formWindowClosing
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox enabledCheckBox_;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    // End of variables declaration//GEN-END:variables
+    
+    
+    public static void showMessage(String msg) {
+        showNonBlockingMessage(JOptionPane.WARNING_MESSAGE, TaggedBitDepthDowngrader.menuName, msg, getInstance());
+    }
+    
+    public static void showMessage(String title, String msg) {
+        showNonBlockingMessage(JOptionPane.WARNING_MESSAGE, title, msg, getInstance());
+    }
+    
+    static boolean showingMsg = false;
+    public static void showNonBlockingMessage(int msgType, String title, String message, Frame owningFrame_) {
+      if (null != owningFrame_) {
+         Object[] options = { "OK" };
+         final JOptionPane optionPane = new JOptionPane(message, msgType, JOptionPane.DEFAULT_OPTION, null, options);
+         /* the false parameter is for not modal */
+         final JDialog dialog = new JDialog(owningFrame_, title, false);
+         optionPane.addPropertyChangeListener(
+                 new PropertyChangeListener() {
+
+                    public void propertyChange(PropertyChangeEvent e) {
+                       String prop = e.getPropertyName();
+                       if (dialog.isVisible() && (e.getSource() == optionPane) && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
+                          dialog.setVisible(false);
+                          showingMsg = false;
+                       }
+                    }
+                 });         
+         
+         dialog.setContentPane(optionPane);
+         /* adapting the frame size to its content */
+         dialog.pack();
+         dialog.setLocationRelativeTo(owningFrame_);
+         dialog.setVisible(true);
+         showingMsg = true;
+      }
+   }
+    
+  public static BitDepthDowngraderControls getInstance() {
+      return frame;
+  }
+}
