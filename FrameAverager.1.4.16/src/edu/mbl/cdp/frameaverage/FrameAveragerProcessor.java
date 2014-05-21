@@ -56,6 +56,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
     int imgDepth;
     int iNO = 0;
     FrameAverager fa;
+    TaggedImage imageOnError;
 
     public FrameAveragerProcessor(FrameAverager fa, CMMCore core) {
         this.fa = fa;
@@ -69,6 +70,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
     protected void process() {
         try {            
             final TaggedImage taggedImage = poll();
+            imageOnError = taggedImage;
             
             if (fa.numberFrames < 2) { // if MFA is disabled
                 if (taggedImage == null) { // EOL check
@@ -86,7 +88,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                 }
                 return;
             } else {
-                if (testForFirstEmptyArray()) {
+                if (isFirstEmptyArray() && !isPartiallyFilledArray()) {
                     if (taggedImage == null) { // EOL check
                         produce(TaggedImageQueue.POISON);
                         return;
@@ -95,12 +97,12 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                         produce(taggedImage);
                         return;
                     }
-                } else {
-                    if (taggedImage == null || TaggedImageQueue.isPoison(taggedImage)) {
+                } else {                                                
+                    if (taggedImage == null || TaggedImageQueue.isPoison(taggedImage)) {                        
                         new Thread("Poison-Image-Delay") {
                             public void run() {                            
-                                    if (testForEmptyArray()) {
-                                        if (!testForFirstEmptyArray()) {
+                                    if (isPartiallyFilledArray()) {
+                                        if (!isFirstEmptyArray()) {
                                             // deals with case of snap when only a single image is coming through                                        
                                             fa.taggedImageArray[0] = fa.taggedImageArray[1];
 
@@ -193,9 +195,10 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             }
 
         } catch (Exception ex) {
+            produce(imageOnError);
+            emptyImageArray();
             ReportingUtils.logError("ERROR: FrameAvg, in Process: ");
-            ex.printStackTrace();
-            produce(TaggedImageQueue.POISON);
+            ex.printStackTrace();            
         }
     }
     
@@ -209,7 +212,17 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
         return false;
     }
     
-    public boolean testForFirstEmptyArray() {
+    public boolean isPartiallyFilledArray() {
+        for (int i=0; i < fa.taggedImageArray.length; i++) {
+            if (fa.taggedImageArray[i] == null) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public boolean isFirstEmptyArray() {
         if (fa.taggedImageArray[1] == null) {
                 return true;            
         }
@@ -281,7 +294,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
     }
     
     public void emptyImageArray() {
-        for (int i = 1; i < fa.taggedImageArray.length; i++) {
+        for (int i = 0; i < fa.taggedImageArray.length; i++) {
             fa.taggedImageArray[i] = null;
         }
     }

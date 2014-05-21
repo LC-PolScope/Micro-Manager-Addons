@@ -31,7 +31,6 @@ package edu.mbl.cdp.frameaverage;
  * Marine Biological Laboratory, Woods Hole, Mass.
  * 
  */
-import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 import org.json.JSONObject;
 import org.micromanager.acquisition.TaggedImageQueue;
@@ -44,13 +43,9 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
 
     
     JSONObject json = null;
-    double exposure;
-    //boolean isDisplayAvailable = false;
-    //int numberFrames_ = 1;
-    int imgDepth;
-    int iNO = 0;
-    
+    int imgDepth;    
     TaggedFrameAverager tfa;
+    TaggedImage imageOnError;
 
     @Override
     public void setApp(ScriptInterface gui) {
@@ -59,19 +54,23 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
         tfa.setApp(gui_);
         tfa.fa.processor = this;   
         tfa.frame = tfa.fa.getControlFrame();
-//        tfa.fa.controlFrame_.setPluginEnabled(true);
    }
 
     @Override
     protected void process() {
         try {            
             final TaggedImage taggedImage = poll();
+            // make a copy to produce if FrameAverager throws an error
+            // preserve image acquired
+            imageOnError = taggedImage; 
             
+            // if in Multi-D mode and disabled on plugin skip processing
             if (tfa.fa.engineWrapper_.isAcquisitionRunning() && !tfa.fa.isEnabledForImageAcquisition) {
                 produce(taggedImage);
                 return;
             }
                         
+            // if less than 2 frames then disable processing
             if (tfa.fa.numberFrames < 2) { // if MFA is disabled
                 if (taggedImage == null) { // EOL check
                     produce(TaggedImageQueue.POISON);
@@ -88,7 +87,8 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                 }
                 return;
             } else {
-                if (testForFirstEmptyArray()) {
+                // if we are not in a state where we have acquired some frames for averaging
+                if (isFirstEmptyArray() && !isPartiallyFilledArray()) {
                     if (taggedImage == null) { // EOL check
                         produce(TaggedImageQueue.POISON);
                         return;
@@ -98,20 +98,23 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                         return;
                     }
                 } else {
-                    if (taggedImage == null || TaggedImageQueue.isPoison(taggedImage)) {
+                    // this case would be for Snap or end of Live routine where additional images
+                    // are needed to be acquired to fill the averaging array
+                    // a Poison image indicates EOL
+                    if (taggedImage == null || TaggedImageQueue.isPoison(taggedImage)) {                                                
                         new Thread("Poison-Image-Delay") {
                             public void run() {                            
-                                    if (testForEmptyArray()) {
-                                        if (!testForFirstEmptyArray()) {
-                                            // deals with case of snap when only a single image is coming through                                        
+                                    if (isPartiallyFilledArray()) { // make sure there are empty slots in the averaging array
+                                        if (!isFirstEmptyArray()) { // basically make sure slot 1 is filled with original image
+                                                                                   
                                             tfa.fa.taggedImageArray[0] = tfa.fa.taggedImageArray[1];
 
                                             if (!tfa.getCMMCore().isSequenceRunning()) {
-                                                acquireImagesStartSeequence(false);
+                                                acquireImagesStartSequence(false);
                                             }
 
-                                            compute(tfa.fa.taggedImageArray); // on to computing avg. frame
-                                            //isDisplayAvailable = true;
+                                            computeProduceAndEmpty(tfa.fa.taggedImageArray); // on to computing avg. frame
+
                                             if (tfa.fa.debugLogEnabled_) {
                                                 tfa.getCMMCore().logMessage("FrameAvg: exiting processor");
                                             }
@@ -149,8 +152,11 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             if (tfa.fa.debugLogEnabled_) {
                 tfa.getCMMCore().logMessage("FrameAvg: entering processor");
             }
-            // taggedImageArray has the rest of the array filled before in Runnable
-            
+                        
+            // Only applies for Live - MultiD and Snap collect images elsewhere (in Runnable and Poison-Image-Delay thread)
+            // when in Live collect (n-1) required images from stream
+            // when averaging array is filled skip this step and continue to
+            // compute and produce avg. image
             if (testForEmptyArray()) {
                 for (int i = 1; i < tfa.fa.taggedImageArray.length; i++) {
                     if (tfa.fa.taggedImageArray[i] == null) {
@@ -174,6 +180,8 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             }
             
             tfa.fa.taggedImageArray[0] = taggedImage;
+            
+            // try and get Display window for status
             if (tfa.fa.displayLive_ != null) {
                 if (tfa.gui.isLiveModeOn()) {
                     String currTxt = tfa.fa.displayLiveLabel.getText();
@@ -188,16 +196,17 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                 }
             }
             
-            compute(tfa.fa.taggedImageArray); // on to computing avg. frame
-            //isDisplayAvailable = true;
+            computeProduceAndEmpty(tfa.fa.taggedImageArray); // on to computing avg. frame
+
             if (tfa.fa.debugLogEnabled_) {
                 tfa.getCMMCore().logMessage("FrameAvg: exiting processor");
             }
 
         } catch (Exception ex) {
+            produce(imageOnError);
+            emptyImageArray();
             ReportingUtils.logError("ERROR: FrameAvg, in Process: ");
-            ex.printStackTrace();
-            produce(TaggedImageQueue.POISON);
+            ex.printStackTrace();            
         }
     }
     
@@ -211,7 +220,17 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
         return false;
     }
     
-    public boolean testForFirstEmptyArray() {
+    public boolean isPartiallyFilledArray() {
+        for (int i=0; i < tfa.fa.taggedImageArray.length; i++) {
+            if (tfa.fa.taggedImageArray[i] == null) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public boolean isFirstEmptyArray() {
         if (tfa.fa.taggedImageArray[1] == null) {
                 return true;            
         }
@@ -219,7 +238,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
         return false;
     }
 
-    private void compute(TaggedImage[] taggedImageArrayTemp) {
+    private void computeProduceAndEmpty(TaggedImage[] taggedImageArrayTemp) {
 
         try {
             if (tfa.fa.debugLogEnabled_) {
@@ -275,15 +294,15 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                 ReportingUtils.logMessage("FrameAvg: produced averaged image");
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            ReportingUtils.logError("Error: FrameAvg, while producing averaged img.");
             produce(taggedImageArrayTemp[0]);
             emptyImageArray();
+            ex.printStackTrace();
+            ReportingUtils.logError("Error: FrameAvg, while producing averaged img.");            
         }
     }
     
     public void emptyImageArray() {
-        for (int i = 1; i < tfa.fa.taggedImageArray.length; i++) {
+        for (int i = 0; i < tfa.fa.taggedImageArray.length; i++) {
             tfa.fa.taggedImageArray[i] = null;
         }
     }
@@ -343,7 +362,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                 if (tfa.fa.debugLogEnabled_) {
                     ReportingUtils.logMessage("FrameAvg: entering runnable");
                 }                
-                acquireImagesStartSeequence(true);
+                acquireImagesStartSequence(true);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 ReportingUtils.logMessage("ERROR: FrameAvg: while entering runnable");
@@ -351,7 +370,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
         }
     }
 
-    public void acquireImagesStartSeequence(boolean stopAtEnd) {
+    public void acquireImagesStartSequence(boolean stopAtEnd) {
         try {
             tfa.getCMMCore().waitForDevice(tfa.getCMMCore().getCameraDevice());
             tfa.getCMMCore().clearCircularBuffer();
