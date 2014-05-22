@@ -32,6 +32,7 @@ package edu.mbl.cdp.frameaverage;
  * 
  */
 
+import java.awt.Event;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -75,6 +76,8 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
     public int FrameXpos = 300;
     public int FrameYpos = 300;
     
+    Image iconImage;
+    
     /**
      * Creates new form FrameAveragerControls
      */
@@ -83,8 +86,8 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         //core_ = fa.core_;
         initComponents();
         URL url = this.getClass().getResource("frameIcon.png");
-        Image im = Toolkit.getDefaultToolkit().getImage(url);
-        setIconImage(im);
+        iconImage = Toolkit.getDefaultToolkit().getImage(url);
+        setIconImage(iconImage);
         getPreferences();
         fa.setNumberFrames(fa.numberFrames);
         numFramesField.setText(String.valueOf(fa.numberFrames));
@@ -97,8 +100,7 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         updateStatus();
         this.pack();
         frame = this;
-    }
-
+    }       
     
     @Override
     public void settingsChanged() {        
@@ -137,7 +139,7 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         FrameAveragerControlPrefs.putInt(FrameYposKey, FrameYpos);
         FrameAveragerControlPrefs.putInt(NumberOfFramesKey, fa_.numberFrames);
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -354,8 +356,9 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
                 enabledCheckBox_.setSelected(false);
                 update();
             }
-            setVisible( false );
+            setVisible( true );
             setPreferences();
+            showNonBlockingYesNo(iconImage);
         }
     }//GEN-LAST:event_formWindowClosing
 
@@ -456,21 +459,6 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         }
     }
 
-//	public String getMetadataField() {
-//		String str = textMetadataField.getText();
-//		if (str.isEmpty()) {
-//			str = null;
-//		}
-//		return str;
-//	}
-//	
-//	public void setMetadataField() {
-//		String str = textMetadataField.getText();
-//		if (str.isEmpty()) {
-//			str = "Image Averaging";
-//		}
-//		fa.METADATAKEY = str;
-//	}
     public int[] stringToIntArray(String str) {
         int[] intArray = parseString(str);
         return intArray;
@@ -554,6 +542,53 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
                        if (dialog.isVisible() && (e.getSource() == optionPane) && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
                           dialog.setVisible(false);
                           showingMsg = false;
+                       }
+                    }
+                 });         
+         
+         dialog.setContentPane(optionPane);
+         /* adapting the frame size to its content */
+         dialog.pack();
+         dialog.setLocationRelativeTo(owningFrame_);
+         dialog.setVisible(true);
+         showingMsg = true;
+      }
+   }
+    
+    public static void showNonBlockingYesNo(Image iconImage) {
+        showNonBlockingYesNo(JOptionPane.QUESTION_MESSAGE, TaggedFrameAverager.menuName, "Remove from Micro-Manager's Image Pipeline ?", getInstance(), iconImage);
+    }
+    
+    public static void showNonBlockingYesNo(int msgType, String title, String message, final FrameAveragerControls owningFrame_, Image iconImage) {
+      if (null != owningFrame_) {
+         Object[] options = { "Yes", "No", "Cancel" };
+         final JOptionPane optionPane = new JOptionPane(message, msgType, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+         /* the false parameter is for not modal */
+         final JDialog dialog = new JDialog((JDialog)null, title, false);
+         dialog.setIconImage(iconImage);
+
+         optionPane.addPropertyChangeListener(
+                 new PropertyChangeListener() {
+
+                    @Override
+                    public void propertyChange(PropertyChangeEvent e) {
+                       String prop = e.getPropertyName();
+                       
+                       if (dialog.isVisible() && (e.getSource() == optionPane) && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
+                          String selectValue = (String) e.getNewValue();
+                          
+                           if ((selectValue.equals("Cancel"))) {
+                               
+                           } else {                                
+                                if ((selectValue.equals("Yes"))) {
+                                    owningFrame_.fa_.stopAndClearProcessor();
+                                }
+                                owningFrame_.setVisible(false);
+                           }  
+
+                           dialog.setVisible(false);
+                           dialog.dispose();
+                           showingMsg = false;
                        }
                     }
                  });         
