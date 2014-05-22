@@ -244,11 +244,10 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             if (tfa.fa.debugLogEnabled_) {
                 ReportingUtils.logMessage("FrameAvg: computing...");
             }
-            TaggedImage taggedImage = taggedImageArrayTemp[0];
 
-            int width = MDUtils.getWidth(taggedImage.tags);
-            int height = MDUtils.getHeight(taggedImage.tags);
-            //tfa.getCMMCore().logMessage(MDUtils.getChannelName(taggedImage.tags));
+            int width = MDUtils.getWidth(taggedImageArrayTemp[0].tags);
+            int height = MDUtils.getHeight(taggedImageArrayTemp[0].tags);
+//            ReportingUtils.logMessage(MDUtils.getChannelName(taggedImage.tags));
 
             int dimension = width * height;
             byte[] pixB;
@@ -259,7 +258,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             Object result = null;
 
             for (int i = 0; i < tfa.fa.numberFrames; i++) {
-//                            tfa.getCMMCore().logMessage("FrameAvg: Avg... image "+i);
+//            ReportingUtils.logMessage("FrameAvg: Avg... image "+i);
                 if (imgDepth == 1) {
                     pixB = (byte[]) taggedImageArrayTemp[i].pix;
                     for (int j = 0; j < dimension; j++) {
@@ -285,7 +284,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             }
             // Averaged channel
             // Weird way of copying a JSONObject
-            JSONObject tags = new JSONObject(taggedImage.tags.toString());
+            JSONObject tags = new JSONObject(taggedImageArrayTemp[0].tags.toString());
             tags.put(FrameAverager.METADATAKEY, tfa.fa.numberFrames);
             TaggedImage averagedImage = new TaggedImage(result, tags);
             produce(averagedImage);
@@ -294,7 +293,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                 ReportingUtils.logMessage("FrameAvg: produced averaged image");
             }
         } catch (Exception ex) {
-            produce(taggedImageArrayTemp[0]);
+            produce(imageOnError);
             emptyImageArray();
             ex.printStackTrace();
             ReportingUtils.logError("Error: FrameAvg, while producing averaged img.");            
@@ -421,26 +420,6 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             if (tfa.fa.debugLogEnabled_) {
                 ReportingUtils.logMessage("Averaging Acquisition took: " + itTook + " milliseconds for "+tfa.fa.numberFrames + " frames");
             }
-            // keep 0 free for the image from engine
-//            for (int i = 1; i < tfa.fa.numberFrames; i++) {
-//                tfa.getCMMCore().waitForDevice(tfa.getCMMCore().getCameraDevice());                
-//                tfa.getCMMCore().snapImage();                   
-//                tfa.fa.taggedImageArray[i] = tfa.getCMMCore().getLastTaggedImage(i);
-//                                
-//                    if (display_ != null) {
-//                        if (display_.isActiveDisplay()) {
-//                            display_.displayStatusLine("Image Avg. Acquiring No. " + (i + 1));
-//                        } else {
-//                            display_ = (VirtualAcquisitionDisplay) engineWrapper_.getDisplay();
-//                        }
-//                    } else {
-//                        display_ = (VirtualAcquisitionDisplay) engineWrapper_.getDisplay();
-//                    }
-//                
-//                tfa.getCMMCore().logMessage("FrameAvg: acquiring #: " + (i + 1));
-//            }
-            
-         //   manageShutter(false);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -469,7 +448,6 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             tfa.gui.addMMBackgroundListener(tfa.frame);
         }
         tfa.frame.setVisible(true);
-//        tfa.fa.controlFrame_.setPluginEnabled(true);
    }
     
     @Override

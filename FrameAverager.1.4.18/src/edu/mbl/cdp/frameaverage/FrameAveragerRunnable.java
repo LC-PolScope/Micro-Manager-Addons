@@ -93,13 +93,11 @@ public class FrameAveragerRunnable implements Runnable {
                     }
                    fa.taggedImageArray[frame] = core_.popNextTaggedImage();
                    frame++;
-                    //if (fa.processor.isDisplayAvailable) {
                         if (fa.display_ != null) {
                             if (fa.display_.acquisitionIsRunning()) {
                                 fa.display_.displayStatusLine("Image Avg. Acquiring No. " + frame);
                             }
                         }
-                    //}
                 }
              }
             long itTook = System.currentTimeMillis() - now;
@@ -113,26 +111,6 @@ public class FrameAveragerRunnable implements Runnable {
             if (fa.debugLogEnabled_) {
                 ReportingUtils.logMessage("Averaging Acquisition took: " + itTook + " milliseconds for "+fa.numberFrames + " frames");
             }
-            // keep 0 free for the image from engine
-//            for (int i = 1; i < fa.numberFrames; i++) {
-//                core_.waitForDevice(core_.getCameraDevice());                
-//                core_.snapImage();                   
-//                fa.taggedImageArray[i] = core_.getLastTaggedImage(i);
-//                                
-//                    if (display_ != null) {
-//                        if (display_.isActiveDisplay()) {
-//                            display_.displayStatusLine("Image Avg. Acquiring No. " + (i + 1));
-//                        } else {
-//                            display_ = (VirtualAcquisitionDisplay) engineWrapper_.getDisplay();
-//                        }
-//                    } else {
-//                        display_ = (VirtualAcquisitionDisplay) engineWrapper_.getDisplay();
-//                    }
-//                
-//                core_.logMessage("FrameAvg: acquiring #: " + (i + 1));
-//            }
-            
-         //   manageShutter(false);
 
         } catch (Exception ex) {
             ex.printStackTrace();

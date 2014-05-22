@@ -32,7 +32,6 @@ package edu.mbl.cdp.frameaverage;
  * 
  */
 
-import java.awt.Event;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -49,22 +48,15 @@ import org.micromanager.internalinterfaces.AcqSettingsListener;
 public class FrameAveragerControls extends javax.swing.JFrame implements AcqSettingsListener {
 
     /* TODO
-     * Start not-Enabled
-     * Add #frames peristence and avoided channels
-     * Disable channels to avoid when averaging is enabled
-     * Disable #frame field during acquisition.
-     *   Is there a signal (e.g. propertychanged) that can be listened for?
+     * 1. Attach Runnable channel specific if using channel avoidance
+     * Currently this is handled via DataProcessor which would skip for avoided channels
      * 
-     * Testing
- 
-     * Add VirtChannels to avoid input field
-     * Then test with VirtualChannelInsertThingie
+     * 
+     * 
+     * 
      */
-    //private final CMMCore core_;
     static FrameAveragerControls frame;
     private FrameAverager fa_;
-    //private AcquisitionWrapperEngine engine_ = null;
-    //private boolean enabled_ = false;
     private static JFrame About;
 
     private String lastChannelAvoidanceStr = "";
@@ -83,7 +75,6 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
      */
     public FrameAveragerControls(FrameAverager fa) {
         this.fa_ = fa;
-        //core_ = fa.core_;
         initComponents();
         URL url = this.getClass().getResource("frameIcon.png");
         iconImage = Toolkit.getDefaultToolkit().getImage(url);
@@ -94,9 +85,7 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
         setDefaultCloseOperation( JFrame.DO_NOTHING_ON_CLOSE );
         this.setLocation(FrameXpos, FrameYpos);
         lastChannelAvoidanceStr = channelsToAvoid.getText();
-        // add as Frame to show with Toolbar
-        // ToolbarMMX.addFrameToShow(this);
-        //initPlugin();
+
         updateStatus();
         this.pack();
         frame = this;
@@ -110,14 +99,13 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
     public void update() {
         if (this.enabledCheckBox_.isSelected()) {
             fa_.UpdateEngineAndCore();
-            //fa_.enable(false);
         }
 
         fa_.enable(this.enabledCheckBox_.isSelected());
         if (!this.enabledCheckBox_.isSelected()) {
             updateLabel("");
         } else {
-            // Add disable avoid channels input box
+            // ToDo: Add disable avoid virtual channels input box
             updateStatus();
         }
         
@@ -429,8 +417,6 @@ public class FrameAveragerControls extends javax.swing.JFrame implements AcqSett
 
     public void updateStatus() {
         try {
-//			int[] intChannelsToAvoid = fa.setChannelsToAvoid();
-//			int numFrames = getNumFrames();
             String avgString;
             String avoidString = "";
 
