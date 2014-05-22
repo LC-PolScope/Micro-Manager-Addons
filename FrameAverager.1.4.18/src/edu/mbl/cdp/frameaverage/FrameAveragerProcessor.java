@@ -162,15 +162,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                     if (tfa.fa.taggedImageArray[i] == null) {
                         if (tfa.fa.displayLive_ != null) {
                             if (tfa.gui.isLiveModeOn()) {
-                             String currTxt = tfa.fa.displayLiveLabel.getText();
-                             if (currTxt.contains("fps")) {
-                                 if (currTxt.contains(" - I")) {
-                                    currTxt = currTxt.substring(0, currTxt.indexOf(" - I"));
-                                 }
-                                tfa.fa.displayLive_.displayStatusLine(currTxt + " - Image Avg. Acquiring No. " + (i+1));
-                             } else {
-                                 tfa.fa.displayLiveLabel.invalidate();                                 
-                             }
+                             tfa.fa.displayLive_.displayStatusLine(" - Image Avg. Acquiring No. " + (i+1));                             
                             }
                         }
                         tfa.fa.taggedImageArray[i] = taggedImage;
@@ -184,15 +176,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
             // try and get Display window for status
             if (tfa.fa.displayLive_ != null) {
                 if (tfa.gui.isLiveModeOn()) {
-                    String currTxt = tfa.fa.displayLiveLabel.getText();
-                    if (currTxt.contains("fps")) {
-                        if (currTxt.contains(" - I")) {
-                            currTxt = currTxt.substring(0, currTxt.indexOf(" - I"));
-                        }
-                        tfa.fa.displayLive_.displayStatusLine(currTxt + " - Image Avg. Acquiring No.  1");
-                    } else {
-                        tfa.fa.displayLiveLabel.invalidate();
-                    }
+                    tfa.fa.displayLive_.displayStatusLine(" - Image Avg. Acquiring No.  1");                    
                 }
             }
             
@@ -399,16 +383,7 @@ public class FrameAveragerProcessor extends DataProcessor<TaggedImage> {
                     }
                     if (tfa.fa.displayLive_ != null) {
                         if (tfa.gui.isLiveModeOn() || !stopAtEnd) {
-                            String currTxt = tfa.fa.displayLiveLabel.getText();
-                            if (currTxt.contains("fps")) {
-                                if (currTxt.contains(" - I")) {
-                                    currTxt = currTxt.substring(0, currTxt.indexOf(" - I"));
-                                }
-                                tfa.fa.displayLive_.displayStatusLine(currTxt + " - Image Avg. Acquiring No. " + frame);
-                            } else {
-                                tfa.fa.displayLiveLabel.invalidate();                                
-                                tfa.fa.displayLive_.displayStatusLine(" - Image Avg. Acquiring No. " + frame);                                
-                            }
+                            tfa.fa.displayLive_.displayStatusLine(" - Image Avg. Acquiring No. " + frame);                            
                         }
                     }
                 }

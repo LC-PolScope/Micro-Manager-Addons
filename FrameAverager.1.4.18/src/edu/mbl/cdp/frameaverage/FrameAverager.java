@@ -34,19 +34,15 @@ package edu.mbl.cdp.frameaverage;
 
 import ij.ImageStack;
 import ij.gui.ImageWindow;
-import java.awt.Component;
 import java.util.prefs.Preferences;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 import org.micromanager.MMOptions;
 import org.micromanager.acquisition.AcquisitionWrapperEngine;
 import org.micromanager.api.DataProcessor;
-import org.micromanager.api.ScriptInterface;
 import org.micromanager.imageDisplay.AcquisitionVirtualStack;
-import org.micromanager.imageDisplay.SimpleWindowControls;
+//import org.micromanager.imageDisplay.SimpleWindowControls;
 import org.micromanager.imageDisplay.VirtualAcquisitionDisplay;
 import org.micromanager.utils.GUIUtils;
 import org.micromanager.utils.ImageFocusListener;
@@ -73,8 +69,7 @@ public class FrameAverager  implements ImageFocusListener {
     
     public VirtualAcquisitionDisplay display_;    
     public VirtualAcquisitionDisplay displayLive_;    
-    public JLabel displayLiveLabel;
-        
+            
     boolean isAdditionalDelayReg = false;
     static String CameraNameProperty = "CameraName";
     static String[] AdditionalDelayCams = {"Retiga 4000R"};
@@ -256,12 +251,6 @@ public class FrameAverager  implements ImageFocusListener {
                 ImageStack ImpStack = focusedWindow.getImagePlus().getImageStack();
                 if (ImpStack instanceof AcquisitionVirtualStack) {
                     displayLive_ = ((AcquisitionVirtualStack) ImpStack).getVirtualAcquisitionDisplay();
-                    Component[] comps = focusedWindow.getComponents();
-                    SimpleWindowControls swc = (SimpleWindowControls) comps[1];
-                    comps = swc.getComponents();
-                    JPanel jp = (JPanel) comps[comps.length-1];
-                    comps = jp.getComponents();
-                    displayLiveLabel = (JLabel) comps[comps.length-1];
                 } else {
                     displayLive_ = null;
                 }
