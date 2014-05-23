@@ -32,6 +32,7 @@ package edu.mbl.cdp.frameaverage;
  * 
  */
 
+import com.swtdesigner.SwingResourceManager;
 import java.awt.Cursor;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -63,8 +64,9 @@ public class About extends javax.swing.JFrame {
   }  
   
   private void setIcon() {
-    URL url = this.getClass().getResource("frameIcon.png");
-    Image im = Toolkit.getDefaultToolkit().getImage(url);
+//    URL url = this.getClass().getResource("frameIcon.png");
+//    Image im = Toolkit.getDefaultToolkit().getImage(url);
+    Image im = SwingResourceManager.getImage(FrameAveragerControls.class, "frameIcon.png");
     setIconImage(im);
   }
   
