@@ -36,8 +36,6 @@ import com.swtdesigner.SwingResourceManager;
 import java.awt.Cursor;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.net.URL;
 import java.util.Calendar;
 import javax.swing.JFrame;
 import javax.swing.text.SimpleAttributeSet;

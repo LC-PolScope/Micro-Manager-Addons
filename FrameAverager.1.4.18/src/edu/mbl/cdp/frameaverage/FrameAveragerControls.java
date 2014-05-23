@@ -35,16 +35,13 @@ package edu.mbl.cdp.frameaverage;
 import com.swtdesigner.SwingResourceManager;
 import java.awt.Frame;
 import java.awt.Image;
-import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.prefs.Preferences;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import org.micromanager.MMStudioMainFrame;
 import org.micromanager.internalinterfaces.AcqSettingsListener;
 
 public class FrameAveragerControls extends javax.swing.JFrame implements AcqSettingsListener {
